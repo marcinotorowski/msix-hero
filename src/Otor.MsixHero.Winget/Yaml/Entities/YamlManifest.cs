@@ -201,7 +201,7 @@ namespace Otor.MsixHero.Winget.Yaml.Entities
         //   "uniqueItems": true,
         //   "description": "List of additional package search terms"
         // }
-        [YamlMember]
+        [YamlMember(DefaultValuesHandling = DefaultValuesHandling.OmitDefaults)]
         public List<string> Tags { get; set; }
 
         //

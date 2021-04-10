@@ -481,6 +481,11 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
             this.model.CopyrightUrl = this.CopyrightUrl.CurrentValue;
             this.model.LicenseUrl = this.LicenseUrl.CurrentValue;
 
+            if (!this.model.Tags.Any())
+            {
+                this.model.Tags = null;
+            }
+            
             if (!string.IsNullOrEmpty(this.ManifestVersion1.CurrentValue) || !string.IsNullOrEmpty(this.ManifestVersion2.CurrentValue) || !string.IsNullOrEmpty(this.ManifestVersion3.CurrentValue))
             {
                 var v1 = this.ManifestVersion1.CurrentValue;

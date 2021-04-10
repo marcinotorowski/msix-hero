@@ -31,6 +31,8 @@ namespace Otor.MsixHero.Winget.Yaml
     /// </summary>
     public class YamlWriter
     {
+        private readonly Lazy<ISerializer> serializer = new Lazy<ISerializer>(GetSerializer);
+        
         /// <summary>
         /// Writes the given YAML definition to a stream and returns an asynchronous task.
         /// </summary>
@@ -53,16 +55,10 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task WriteAsync(YamlManifest manifest, TextWriter textWriter, CancellationToken cancellationToken = default)
         {
-            var serializerBuilder = new SerializerBuilder()
-                .WithEmissionPhaseObjectGraphVisitor(args => new DefaultExclusiveObjectGraphVisitor(args.InnerVisitor))
-                .WithTypeConverter(new YamlStringEnumConverter());
-            
-            var serializer = serializerBuilder.Build();
-            
             var stringBuilder = new StringBuilder();
             await using (var stringWriter = new StringWriter(stringBuilder))
             {
-                serializer.Serialize(stringWriter, manifest);
+                this.serializer.Value.Serialize(stringWriter, manifest);
             }
             
             cancellationToken.ThrowIfCancellationRequested();
@@ -83,10 +79,8 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <param name="stream">The stream to which the content will be written.</param>
         public void Write(YamlManifest manifest, Stream stream)
         {
-            using (var textWriter = new StreamWriter(stream, leaveOpen: true))
-            {
-                this.Write(manifest, textWriter);
-            }
+            using var textWriter = new StreamWriter(stream, leaveOpen: true);
+            this.Write(manifest, textWriter);
         }
 
         /// <summary>
@@ -96,11 +90,10 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <param name="textWriter">The text writer where the content will be written.</param>
         public void Write(YamlManifest manifest, TextWriter textWriter)
         {
-            var serializer = new Serializer();
             var stringBuilder = new StringBuilder();
             using (var stringWriter = new StringWriter(stringBuilder))
             {
-                serializer.Serialize(stringWriter, manifest);
+                this.serializer.Value.Serialize(stringWriter, manifest);
             }
 
             stringBuilder.AppendLine();
@@ -110,6 +103,15 @@ namespace Otor.MsixHero.Winget.Yaml
             serialized = Regex.Replace(serialized, @"[\r\n]{2,}", Environment.NewLine);
 
             textWriter.Write(serialized);
+        }
+
+        private static ISerializer GetSerializer()
+        {
+            var serializerBuilder = new SerializerBuilder()
+                .WithEmissionPhaseObjectGraphVisitor(args => new DefaultExclusiveObjectGraphVisitor(args.InnerVisitor))
+                .WithTypeConverter(new YamlStringEnumConverter());
+            var serializer = serializerBuilder.Build();
+            return serializer;
         }
     }
 }

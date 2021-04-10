@@ -14,6 +14,7 @@
 // Full notice:
 // https://github.com/marcinotorowski/msix-hero/blob/develop/LICENSE.md
 
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,6 +28,8 @@ namespace Otor.MsixHero.Winget.Yaml
     /// </summary>
     public class YamlReader
     {
+        private readonly Lazy<IDeserializer> deserializer = new Lazy<IDeserializer>(GetDeserializer);
+        
         /// <summary>
         /// Reads WinGet definition from a stream and returns a task representing the asynchronous operation.
         /// </summary>
@@ -47,13 +50,7 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <returns>The asynchronous task that represents the operation.</returns>
         public Task<YamlManifest> ReadAsync(TextReader textReader, CancellationToken cancellationToken = default)
         {
-            return Task.Run(() =>
-            {
-                var deserializerBuilder = new DeserializerBuilder().IgnoreUnmatchedProperties();
-                var deserializer = deserializerBuilder.Build();
-                return deserializer.Deserialize<YamlManifest>(textReader);
-            },
-            cancellationToken);
+            return Task.Run(() => deserializer.Value.Deserialize<YamlManifest>(textReader), cancellationToken);
         }
 
         /// <summary>
@@ -75,9 +72,16 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <returns>The WinGet definition.</returns>
         public YamlManifest Read(TextReader textReader)
         {
-            var deserializerBuilder = new DeserializerBuilder().IgnoreUnmatchedProperties().WithTypeConverter(new YamlStringEnumConverter());
-            var deserializer = deserializerBuilder.Build();
-            return deserializer.Deserialize<YamlManifest>(textReader);
+            return deserializer.Value.Deserialize<YamlManifest>(textReader);
+        }
+
+        private static IDeserializer GetDeserializer()
+        {
+            var serializerBuilder = new DeserializerBuilder()
+                .IgnoreUnmatchedProperties()
+                .WithTypeConverter(new YamlStringEnumConverter());
+            var serializer = serializerBuilder.Build();
+            return serializer;
         }
     }
 }
