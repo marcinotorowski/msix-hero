@@ -14,34 +14,51 @@
 // Full notice:
 // https://github.com/marcinotorowski/msix-hero/blob/develop/LICENSE.md
 
+using System.Management.Automation;
+using YamlDotNet.Serialization;
+
 namespace Otor.MsixHero.Winget.Yaml.Entities
 {
+    /// <remarks>
+    /// https://github.com/microsoft/winget-cli/blob/c2bf23012848d1bbaa376abc14f5e7c68c64efc1/schemas/JSON/manifests/v1.0.0/manifest.singleton.1.0.0.json#L63
+    /// </remarks>
     public enum YamlInstallerType
     {
-        // ReSharper disable once InconsistentNaming
-        none = 0,
-
-        // ReSharper disable once InconsistentNaming
-        exe,
-
-        // ReSharper disable once InconsistentNaming
-        msi,
-
-        // ReSharper disable once InconsistentNaming
-        msix,
-
-        // ReSharper disable once InconsistentNaming
+        [YamlMember(Alias = "none")]
+        None = 0,
+        
+        [YamlMember(Alias = "exe")]
+        Exe,
+        
+        [YamlMember(Alias = "msi")]
+        Msi,
+        
+        [YamlMember(Alias = "msix")]
+        Msix,
+        
+        // ReSharper disable once StringLiteralTypo
+        [YamlMember(Alias = "inno")]
         // ReSharper disable once IdentifierTypo
-        inno,
+        InnoSetup,
+
+        [YamlMember(Alias = "wix")]
+        Wix,
         
-        // ReSharper disable once InconsistentNaming
-        wix,
-        
-        // ReSharper disable once InconsistentNaming
+        // ReSharper disable once StringLiteralTypo
+        [YamlMember(Alias = "nullsoft")]
         // ReSharper disable once IdentifierTypo
-        nullsoft,
+        Nullsoft,
         
-        // ReSharper disable once InconsistentNaming
-        appx
+        [YamlMember(Alias = "appx")]
+        Appx,
+        
+        [YamlMember(Alias = "zip")]
+        Zip,
+        
+        [YamlMember(Alias = "burn")]
+        Burn,
+        
+        [YamlMember(Alias = "pwa")]
+        ProgressiveWebApp
     }
 }

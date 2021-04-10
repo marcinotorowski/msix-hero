@@ -34,24 +34,24 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <summary>
         /// Writes the given YAML definition to a stream and returns an asynchronous task.
         /// </summary>
-        /// <param name="definition">The YAML definition.</param>
+        /// <param name="manifest">The YAML definition.</param>
         /// <param name="stream">The stream where to write the YAML content.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task WriteAsync(YamlDefinition definition, Stream stream, CancellationToken cancellationToken = default)
+        public async Task WriteAsync(YamlManifest manifest, Stream stream, CancellationToken cancellationToken = default)
         {
             await using var textWriter = new StreamWriter(stream, leaveOpen: true);
-            await this.WriteAsync(definition, textWriter, cancellationToken).ConfigureAwait(false);
+            await this.WriteAsync(manifest, textWriter, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Writes the given YAML definition to a given text writer and returns a task that represents the asynchronous operation.
         /// </summary>
-        /// <param name="definition">The YAML definition.</param>
+        /// <param name="manifest">The YAML definition.</param>
         /// <param name="textWriter">The text writer where the content will be written.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task WriteAsync(YamlDefinition definition, TextWriter textWriter, CancellationToken cancellationToken = default)
+        public async Task WriteAsync(YamlManifest manifest, TextWriter textWriter, CancellationToken cancellationToken = default)
         {
             var serializerBuilder = new SerializerBuilder().WithEmissionPhaseObjectGraphVisitor(args => new DefaultExclusiveObjectGraphVisitor(args.InnerVisitor));
             var serializer = serializerBuilder.Build();
@@ -59,7 +59,7 @@ namespace Otor.MsixHero.Winget.Yaml
             var stringBuilder = new StringBuilder();
             using (var stringWriter = new StringWriter(stringBuilder))
             {
-                serializer.Serialize(stringWriter, definition);
+                serializer.Serialize(stringWriter, manifest);
             }
             
             cancellationToken.ThrowIfCancellationRequested();
@@ -76,28 +76,28 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <summary>
         /// Writes the given YAML definition to a stream.
         /// </summary>
-        /// <param name="definition">The YAML definition.</param>
+        /// <param name="manifest">The YAML definition.</param>
         /// <param name="stream">The stream to which the content will be written.</param>
-        public void Write(YamlDefinition definition, Stream stream)
+        public void Write(YamlManifest manifest, Stream stream)
         {
             using (var textWriter = new StreamWriter(stream, leaveOpen: true))
             {
-                this.Write(definition, textWriter);
+                this.Write(manifest, textWriter);
             }
         }
 
         /// <summary>
         /// Writes the given YAML definition to a text writer.
         /// </summary>
-        /// <param name="definition">The YAML definition.</param>
+        /// <param name="manifest">The YAML definition.</param>
         /// <param name="textWriter">The text writer where the content will be written.</param>
-        public void Write(YamlDefinition definition, TextWriter textWriter)
+        public void Write(YamlManifest manifest, TextWriter textWriter)
         {
             var serializer = new Serializer();
             var stringBuilder = new StringBuilder();
             using (var stringWriter = new StringWriter(stringBuilder))
             {
-                serializer.Serialize(stringWriter, definition);
+                serializer.Serialize(stringWriter, manifest);
             }
 
             stringBuilder.AppendLine();

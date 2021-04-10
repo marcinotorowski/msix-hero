@@ -18,29 +18,15 @@ using YamlDotNet.Serialization;
 
 namespace Otor.MsixHero.Winget.Yaml.Entities
 {
-    public enum YamlArchitecture
+    /// <remarks>
+    /// https://github.com/microsoft/winget-cli/blob/c2bf23012848d1bbaa376abc14f5e7c68c64efc1/schemas/JSON/manifests/v1.0.0/manifest.singleton.1.0.0.json#L47
+    /// </remarks>
+    public enum YamlPlatform
     {
-        // ReSharper disable once InconsistentNaming
-        [YamlMember(Alias = "none")]
-        None = 0,
+        [YamlMember(Alias = "Windows.Desktop")]
+        WindowsDesktop,
 
-        // ReSharper disable once InconsistentNaming
-        [YamlMember(Alias = "x64")]
-        X64,
-
-        // ReSharper disable once InconsistentNaming
-        [YamlMember(Alias = "x86")]
-        X86,
-
-        // ReSharper disable once InconsistentNaming
-        [YamlMember(Alias = "arm")]
-        Arm,
-
-        // ReSharper disable once InconsistentNaming
-        [YamlMember(Alias = "arm64")]
-        Arm64,
-        
-        [YamlMember(Alias = "neutral")]
-        Neutral
+        [YamlMember(Alias = "Windows.Universal")]
+        WindowsUniversal
     }
 }

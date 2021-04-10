@@ -33,7 +33,7 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <param name="stream">The input stream.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The asynchronous task that represents the operation.</returns>
-        public async Task<YamlDefinition> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task<YamlManifest> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             using var textReader = new StreamReader(stream, leaveOpen: true);
             return await this.ReadAsync(textReader, cancellationToken).ConfigureAwait(false);
@@ -45,13 +45,13 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <param name="textReader">The text reader.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The asynchronous task that represents the operation.</returns>
-        public Task<YamlDefinition> ReadAsync(TextReader textReader, CancellationToken cancellationToken = default)
+        public Task<YamlManifest> ReadAsync(TextReader textReader, CancellationToken cancellationToken = default)
         {
             return Task.Run(() =>
             {
                 var deserializerBuilder = new DeserializerBuilder().IgnoreUnmatchedProperties();
                 var deserializer = deserializerBuilder.Build();
-                return deserializer.Deserialize<YamlDefinition>(textReader);
+                return deserializer.Deserialize<YamlManifest>(textReader);
             },
             cancellationToken);
         }
@@ -61,7 +61,7 @@ namespace Otor.MsixHero.Winget.Yaml
         /// </summary>
         /// <param name="stream">The input stream.</param>
         /// <returns>The WinGet definition.</returns>
-        public YamlDefinition Read(Stream stream)
+        public YamlManifest Read(Stream stream)
         {
             using (var textReader = new StreamReader(stream, leaveOpen: true))
             {
@@ -75,11 +75,11 @@ namespace Otor.MsixHero.Winget.Yaml
         /// </summary>
         /// <param name="textReader">The input textReader.</param>
         /// <returns>The WinGet definition.</returns>
-        public YamlDefinition Read(TextReader textReader)
+        public YamlManifest Read(TextReader textReader)
         {
             var deserializerBuilder = new DeserializerBuilder().IgnoreUnmatchedProperties();
             var deserializer = deserializerBuilder.Build();
-            return deserializer.Deserialize<YamlDefinition>(textReader);
+            return deserializer.Deserialize<YamlManifest>(textReader);
         }
     }
 }

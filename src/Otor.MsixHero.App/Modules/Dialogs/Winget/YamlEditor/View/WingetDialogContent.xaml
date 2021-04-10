@@ -109,7 +109,7 @@
                                 <TextBlock 
                                     Style="{StaticResource LabelTextBlock}"
                                     Text="Homepage" Margin="0 16 0 6" />
-                                <TextBox Text="{Binding Homepage.CurrentValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnNotifyDataErrors=True, NotifyOnValidationError=True}" />
+                                <TextBox Text="{Binding PackageUrl.CurrentValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnNotifyDataErrors=True, NotifyOnValidationError=True}" />
 
                                 <TextBlock 
                                     Style="{StaticResource LabelTextBlock}"
@@ -181,14 +181,14 @@
                                 Text="Installer type" />
 
                             <ComboBox Margin="0 0 0 6" SelectedValuePath="Tag" SelectedValue="{Binding InstallerType.CurrentValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnNotifyDataErrors=True, NotifyOnValidationError=True}" IsReadOnly="True">
-                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.msix}">MSIX</ComboBoxItem>
-                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.appx}">APPX</ComboBoxItem>
-                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.exe}">Executable (generic)</ComboBoxItem>
-                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.inno}">Executable (Inno Setup)</ComboBoxItem>
-                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.nullsoft}">Executable (NSIS)</ComboBoxItem>
-                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.wix}">Executable (WIX Bootstrapper)</ComboBoxItem>
-                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.msi}">MSI (Windows Installer)</ComboBoxItem>
-                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.none}">Unknown / not specified</ComboBoxItem>
+                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.Msix}">MSIX</ComboBoxItem>
+                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.Appx}">APPX</ComboBoxItem>
+                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.Exe}">Executable (generic)</ComboBoxItem>
+                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.InnoSetup}">Executable (Inno Setup)</ComboBoxItem>
+                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.Nullsoft}">Executable (NSIS)</ComboBoxItem>
+                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.Wix}">Executable (WIX Bootstrapper)</ComboBoxItem>
+                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.Msi}">MSI (Windows Installer)</ComboBoxItem>
+                                <ComboBoxItem Tag="{x:Static winget:YamlInstallerType.None}">Unknown / not specified</ComboBoxItem>
                             </ComboBox>
 
                             <UniformGrid Columns="2" Margin="0 16 0 0">
@@ -197,12 +197,12 @@
                                         Style="{StaticResource LabelTextBlock}"
                                         Text="Installer architecture" />
                                     <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Architecture.CurrentValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnNotifyDataErrors=True, NotifyOnValidationError=True}" IsReadOnly="True">
-                                        <ComboBoxItem Tag="{x:Static winget:YamlArchitecture.none}">Unknown / not specified</ComboBoxItem>
+                                        <ComboBoxItem Tag="{x:Static winget:YamlArchitecture.None}">Unknown / not specified</ComboBoxItem>
                                         <ComboBoxItem Tag="{x:Static winget:YamlArchitecture.Neutral}">Neutral</ComboBoxItem>
-                                        <ComboBoxItem Tag="{x:Static winget:YamlArchitecture.arm}">ARM</ComboBoxItem>
-                                        <ComboBoxItem Tag="{x:Static winget:YamlArchitecture.arm64}">ARM64</ComboBoxItem>
-                                        <ComboBoxItem Tag="{x:Static winget:YamlArchitecture.x64}">x64</ComboBoxItem>
-                                        <ComboBoxItem Tag="{x:Static winget:YamlArchitecture.x86}">x86</ComboBoxItem>
+                                        <ComboBoxItem Tag="{x:Static winget:YamlArchitecture.Arm}">ARM</ComboBoxItem>
+                                        <ComboBoxItem Tag="{x:Static winget:YamlArchitecture.Arm64}">ARM64</ComboBoxItem>
+                                        <ComboBoxItem Tag="{x:Static winget:YamlArchitecture.X64}">x64</ComboBoxItem>
+                                        <ComboBoxItem Tag="{x:Static winget:YamlArchitecture.X86}">x86</ComboBoxItem>
                                     </ComboBox>
                                 </StackPanel>
 
@@ -211,9 +211,9 @@
                                         Style="{StaticResource LabelTextBlock}"
                                         Text="Scope" />
                                     <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Scope.CurrentValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnNotifyDataErrors=True, NotifyOnValidationError=True}">
-                                        <ComboBoxItem Tag="{x:Static winget:YamlScope.none}">Unknown / not specified</ComboBoxItem>
-                                        <ComboBoxItem Tag="{x:Static winget:YamlScope.machine}">Machine installation</ComboBoxItem>
-                                        <ComboBoxItem Tag="{x:Static winget:YamlScope.user}">User installation</ComboBoxItem>
+                                        <ComboBoxItem Tag="{x:Static winget:YamlScope.None}">Unknown / not specified</ComboBoxItem>
+                                        <ComboBoxItem Tag="{x:Static winget:YamlScope.Machine}">Machine installation</ComboBoxItem>
+                                        <ComboBoxItem Tag="{x:Static winget:YamlScope.User}">User installation</ComboBoxItem>
                                     </ComboBox>
                                 </StackPanel>
 

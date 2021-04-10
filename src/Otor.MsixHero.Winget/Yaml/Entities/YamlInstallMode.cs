@@ -18,21 +18,21 @@ using YamlDotNet.Serialization;
 
 namespace Otor.MsixHero.Winget.Yaml.Entities
 {
-    public class YamlSwitches
+    /// <remarks>
+    /// https://github.com/microsoft/winget-cli/blob/c2bf23012848d1bbaa376abc14f5e7c68c64efc1/schemas/JSON/manifests/v1.0.0/manifest.singleton.1.0.0.json#L90
+    /// </remarks>
+    public enum YamlInstallMode
     {
-        [YamlMember(Order = 1)]
-        public string Silent { get; set; }
+        [YamlMember(Alias = "none")]
+        None = 0,
 
-        [YamlMember(Order = 2)]
-        public string SilentWithProgress { get; set; }
+        [YamlMember(Alias = "interactive")]
+        Interactive,
 
-        [YamlMember(Order = 3)]
-        public string Custom { get; set; }
-
-        [YamlMember(Order = 4)]
-        public string Language { get; set; }
-
-        [YamlMember(Order = int.MaxValue)]
-        public string Interactive { get; set; }
+        [YamlMember(Alias = "silent")]
+        Silent,
+        
+        [YamlMember(Alias = "silentWithProgress")]
+        SilentWithProgress
     }
 }

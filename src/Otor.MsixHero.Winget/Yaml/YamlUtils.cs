@@ -195,34 +195,34 @@ namespace Otor.MsixHero.Winget.Yaml
             return builder.ToString();
         }
 
-        public async Task<YamlDefinition> CreateFromFile(string filePath, CancellationToken cancellationToken = default)
+        public async Task<YamlManifest> CreateFromFile(string filePath, CancellationToken cancellationToken = default)
         {
             var detector = new InstallerTypeDetector();
             var detected = await detector.DetectSetupType(filePath, cancellationToken).ConfigureAwait(false);
 
-            YamlDefinition yaml;
+            YamlManifest yaml;
 
             switch (detected)
             {
-                case YamlInstallerType.msi:
+                case YamlInstallerType.Msi:
                     yaml = await Task.Run(() => this.CreateFromMsi(filePath), cancellationToken).ConfigureAwait(false);
                     break;
-                case YamlInstallerType.none:
-                case YamlInstallerType.exe:
-                case YamlInstallerType.inno:
-                case YamlInstallerType.nullsoft:
-                case YamlInstallerType.wix:
+                case YamlInstallerType.None:
+                case YamlInstallerType.Exe:
+                case YamlInstallerType.InnoSetup:
+                case YamlInstallerType.Nullsoft:
+                case YamlInstallerType.Wix:
                     yaml = await Task.Run(() => this.CreateFromExe(filePath), cancellationToken).ConfigureAwait(false);
                     yaml.Installers[0].InstallerType = detected;
                     break;
-                case YamlInstallerType.msix:
-                case YamlInstallerType.appx:
+                case YamlInstallerType.Msix:
+                case YamlInstallerType.Appx:
                     yaml = await this.CreateFromMsix(filePath, cancellationToken).ConfigureAwait(false);
                     yaml.Installers[0].InstallerType = detected;
-                    yaml.MinOperatingSystemVersion = Version.Parse("10.0.0");
+                    yaml.MinimumOperatingSystemVersion = Version.Parse("10.0.0");
                     break;
                 default:
-                    yaml = new YamlDefinition
+                    yaml = new YamlManifest
                     {
                         Installers = new List<YamlInstaller>
                         {
@@ -233,8 +233,8 @@ namespace Otor.MsixHero.Winget.Yaml
                     break;
             }
 
-            yaml.Id = (yaml.Publisher + "." + yaml.Name).Replace(" ", string.Empty);
-            yaml.Installers[0].Sha256 = await this.CalculateHashAsync(new FileInfo(filePath), cancellationToken).ConfigureAwait(false);
+            yaml.PackageIdentifier = (yaml.Publisher + "." + yaml.PackageName).Replace(" ", string.Empty);
+            yaml.Installers[0].InstallerSha256 = await this.CalculateHashAsync(new FileInfo(filePath), cancellationToken).ConfigureAwait(false);
             
             if (yaml.License != null && yaml.License.IndexOf("Copy", StringComparison.OrdinalIgnoreCase) == -1 && yaml.License.IndexOf("(C)", StringComparison.OrdinalIgnoreCase) == -1 && yaml.License.IndexOf("http", StringComparison.OrdinalIgnoreCase) == -1)
             {
@@ -244,16 +244,16 @@ namespace Otor.MsixHero.Winget.Yaml
             return yaml;
         }
 
-        private YamlDefinition CreateFromMsi(string filePath)
+        private YamlManifest CreateFromMsi(string filePath)
         {
             var msiProps = new Msi().GetProperties(filePath);
 
-            var yamlDefinition = new YamlDefinition
+            var yamlDefinition = new YamlManifest
             {
-                Name = msiProps.TryGetValue("ProductName", out var pn) ? pn : null,
-                Version = msiProps.TryGetValue("ProductVersion", out var pv) ? pv : null,
+                PackageName = msiProps.TryGetValue("ProductName", out var pn) ? pn : null,
+                PackageVersion = msiProps.TryGetValue("ProductVersion", out var pv) ? pv : null,
                 Publisher = msiProps.TryGetValue("Manufacturer", out var pm) ? pm : null,
-                Description = msiProps.TryGetValue("ARPCOMMENTS", out var arpc) ? arpc : null,
+                ShortDescription = msiProps.TryGetValue("ARPCOMMENTS", out var arpc) ? arpc : null,
                 License = msiProps.TryGetValue("ARPCONTACT", out var arpcont) ? arpcont : null,
                 LicenseUrl = msiProps.TryGetValue("ARPURLINFOABOUT", out var arpurl) || msiProps.TryGetValue("ARPHELPLINK", out arpurl) ? arpurl : null,
                 // Language = msiProps.TryGetValue("ProductLanguage", out var pl) ? pl : null,
@@ -261,9 +261,10 @@ namespace Otor.MsixHero.Winget.Yaml
                 {
                     new YamlInstaller
                     {
-                        InstallerType = YamlInstallerType.msi,
-                        Scope = msiProps.TryGetValue("ALLUSERS", out var allusers) && allusers == "1" ? YamlScope.machine : YamlScope.none,
-                        Arch = msiProps.TryGetValue("Template", out var template) && (template.IndexOf("Intel64", StringComparison.OrdinalIgnoreCase) != -1 || template.IndexOf("x64", StringComparison.OrdinalIgnoreCase) != -1 || template.IndexOf("amd64", StringComparison.OrdinalIgnoreCase) != -1) ? YamlArchitecture.x64 : YamlArchitecture.x86,
+                        InstallerType = YamlInstallerType.Msi,
+                        Scope = msiProps.TryGetValue("ALLUSERS", out var allUsers) && allUsers == "1" ? YamlScope.Machine : YamlScope.None,
+                        Architecture = msiProps.TryGetValue("Template", out var template) && (template.IndexOf("Intel64", StringComparison.OrdinalIgnoreCase) != -1 || template.IndexOf("x64", StringComparison.OrdinalIgnoreCase) != -1 || template.IndexOf("amd64", StringComparison.OrdinalIgnoreCase) != -1) ? YamlArchitecture.X64 : YamlArchitecture.X86,
+                        Platform = YamlPlatform.WindowsDesktop
                     }
                 }
             };
@@ -287,21 +288,21 @@ namespace Otor.MsixHero.Winget.Yaml
         }
 
         // ReSharper disable once MemberCanBeMadeStatic.Local
-        private YamlDefinition CreateFromExe(string filePath)
+        private YamlManifest CreateFromExe(string filePath)
         {
             var fileVersionInfo = FileVersionInfo.GetVersionInfo(filePath);
-            var yamlDefinition = new YamlDefinition
+            var yamlDefinition = new YamlManifest
             {
-                Name = fileVersionInfo.ProductName?.Trim(),
-                Version = fileVersionInfo.ProductVersion?.Trim(),
+                PackageName = fileVersionInfo.ProductName?.Trim(),
+                PackageVersion = fileVersionInfo.ProductVersion?.Trim(),
                 Publisher = fileVersionInfo.CompanyName?.Trim(),
-                Description = fileVersionInfo.FileDescription?.Trim(),
+                ShortDescription = fileVersionInfo.FileDescription?.Trim(),
                 License = fileVersionInfo.LegalCopyright ?? fileVersionInfo.LegalTrademarks,
                 Installers = new List<YamlInstaller>
                 {
                     new YamlInstaller
                     {
-                        InstallerType = YamlInstallerType.exe
+                        InstallerType = YamlInstallerType.Exe
                     }
                 }
             };
@@ -314,49 +315,47 @@ namespace Otor.MsixHero.Winget.Yaml
                     yamlDefinition.License = null;
                 }
             }
-            
-            using (var fs = File.OpenRead(filePath))
+
+            using var fs = File.OpenRead(filePath);
+            using var binaryReader = new BinaryReader(fs);
+            var mz = binaryReader.ReadUInt16();
+            if (mz != 0x5a4d)
             {
-                using (var binaryReader = new BinaryReader(fs))
-                {
-                    var mz = binaryReader.ReadUInt16();
-                    if (mz == 0x5a4d) // check if it's a valid image ("MZ")
-                    {
-                        fs.Position = 60; // this location contains the offset for the PE header
-                        var offset = binaryReader.ReadUInt32();
+                return yamlDefinition;
+            }
+            
+            fs.Position = 60; // this location contains the offset for the PE header
+            var offset = binaryReader.ReadUInt32();
 
-                        fs.Position = offset + sizeof(uint); // contains the architecture
-                        var machine = binaryReader.ReadUInt16();
+            fs.Position = offset + sizeof(uint); // contains the architecture
+            var machine = binaryReader.ReadUInt16();
 
-                        if (machine == 0x8664) // IMAGE_FILE_MACHINE_AMD64
-                        {
-                            yamlDefinition.Installers[0].Arch = YamlArchitecture.x64;
-                        }
-                        else if (machine == 0x014c) // IMAGE_FILE_MACHINE_I386
-                        {
-                            yamlDefinition.Installers[0].Arch = YamlArchitecture.x86;
-                        }
-                        else if (machine == 0x0200) // IMAGE_FILE_MACHINE_IA64
-                        {
-                            yamlDefinition.Installers[0].Arch = YamlArchitecture.x64;
-                        }
-                    }
-                }
+            if (machine == 0x8664) // IMAGE_FILE_MACHINE_AMD64
+            {
+                yamlDefinition.Installers[0].Architecture = YamlArchitecture.X64;
+            }
+            else if (machine == 0x014c) // IMAGE_FILE_MACHINE_I386
+            {
+                yamlDefinition.Installers[0].Architecture = YamlArchitecture.X86;
+            }
+            else if (machine == 0x0200) // IMAGE_FILE_MACHINE_IA64
+            {
+                yamlDefinition.Installers[0].Architecture = YamlArchitecture.X64;
             }
 
             return yamlDefinition;
         }
 
-        private async Task<YamlDefinition> CreateFromMsix(string filePath, CancellationToken cancellationToken = default)
+        private async Task<YamlManifest> CreateFromMsix(string filePath, CancellationToken cancellationToken = default)
         {
-            var yamlDefinition = new YamlDefinition()
+            var yamlDefinition = new YamlManifest()
             {
                 Installers = new List<YamlInstaller>
                 {
                     new YamlInstaller
                     {
-                        Scope = YamlScope.user,
-                        InstallerType = YamlInstallerType.msix
+                        Scope = YamlScope.User,
+                        InstallerType = YamlInstallerType.Msix
                     }
                 }
             };
@@ -385,10 +384,10 @@ namespace Otor.MsixHero.Winget.Yaml
                 var manifestReader = new AppxManifestReader();
                 var details = await manifestReader.Read(reader, cancellationToken).ConfigureAwait(false);
 
-                yamlDefinition.Name = details.DisplayName;
+                yamlDefinition.PackageName = details.DisplayName;
                 yamlDefinition.Publisher = details.PublisherDisplayName;
-                yamlDefinition.Version = details.Version;
-                yamlDefinition.Description = details.Description;
+                yamlDefinition.PackageVersion = details.Version;
+                yamlDefinition.ShortDescription = details.Description;
 
                 if (details.Applications?.Any() == true)
                 {
@@ -401,26 +400,26 @@ namespace Otor.MsixHero.Winget.Yaml
 
                     if (!string.IsNullOrEmpty(candidateForAppMoniker))
                     {
-                        yamlDefinition.AppMoniker = candidateForAppMoniker.Substring(0, candidateForAppMoniker.Length - ".exe".Length).Split('\\', '/').Last();
+                        yamlDefinition.Moniker = candidateForAppMoniker.Substring(0, candidateForAppMoniker.Length - ".exe".Length).Split('\\', '/').Last();
                     }
                 }
 
                 switch (details.ProcessorArchitecture)
                 {
                     case AppxPackageArchitecture.Arm:
-                        yamlDefinition.Installers[0].Arch = YamlArchitecture.arm;
+                        yamlDefinition.Installers[0].Architecture = YamlArchitecture.Arm;
                         break;
                     case AppxPackageArchitecture.Neutral:
-                        yamlDefinition.Installers[0].Arch = YamlArchitecture.Neutral;
+                        yamlDefinition.Installers[0].Architecture = YamlArchitecture.Neutral;
                         break;
                     case AppxPackageArchitecture.Arm64:
-                        yamlDefinition.Installers[0].Arch = YamlArchitecture.arm64;
+                        yamlDefinition.Installers[0].Architecture = YamlArchitecture.Arm64;
                         break;
                     case AppxPackageArchitecture.x86:
-                        yamlDefinition.Installers[0].Arch = YamlArchitecture.x86;
+                        yamlDefinition.Installers[0].Architecture = YamlArchitecture.X86;
                         break;
                     case AppxPackageArchitecture.x64:
-                        yamlDefinition.Installers[0].Arch = YamlArchitecture.x64;
+                        yamlDefinition.Installers[0].Architecture = YamlArchitecture.X64;
                         break;
                 }
             }
@@ -428,9 +427,9 @@ namespace Otor.MsixHero.Winget.Yaml
             return yamlDefinition;
         }
 
-        public void FillGaps(YamlDefinition definition)
+        public void FillGaps(YamlManifest manifest)
         {
-            if (definition == null)
+            if (manifest == null)
             {
                 return;
             }
@@ -438,18 +437,18 @@ namespace Otor.MsixHero.Winget.Yaml
             // propagate installer type from parent to all children without the type. This property should normally be left
             // unused, but this is to retain compatibility with some earlier YAML formats.
 #pragma warning disable 618
-            if (definition.Installers != null && definition.InstallerType != default)
+            if (manifest.Installers != null && manifest.InstallerType != default)
             {
-                foreach (var installer in definition.Installers.Where(i => i.InstallerType == default))
+                foreach (var installer in manifest.Installers.Where(i => i.InstallerType == default))
                 {
-                    installer.InstallerType = definition.InstallerType;
+                    installer.InstallerType = manifest.InstallerType;
                 }
             }
 #pragma warning restore 618
             
-            if (definition.Id == null && !string.IsNullOrEmpty(definition.Publisher) && !string.IsNullOrEmpty(definition.Name))
+            if (manifest.PackageIdentifier == null && !string.IsNullOrEmpty(manifest.Publisher) && !string.IsNullOrEmpty(manifest.PackageName))
             {
-                definition.Id = (definition.Publisher + "." + definition.Name).Replace(" ", string.Empty);
+                manifest.PackageIdentifier = (manifest.Publisher + "." + manifest.PackageName).Replace(" ", string.Empty);
             }
 #pragma warning restore 618
         }

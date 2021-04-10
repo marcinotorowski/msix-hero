@@ -42,7 +42,7 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
         protected readonly YamlReader YamlReader = new YamlReader();
         protected readonly YamlUtils YamlUtils = new YamlUtils();
         private bool isLoading;
-        private YamlDefinition model = new YamlDefinition();
+        private YamlManifest model = new YamlManifest();
         private bool autoId = true;
         private ICommand loadFromSetup;
         private ICommand generateSha256, openSha256;
@@ -60,7 +60,7 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
             this.ManifestVersion3 = new ValidatedChangeableProperty<string>("Manifest version", true, ValidatorFactory.ValidateInteger(false, "Revision"));
             this.AppMoniker = new ChangeableProperty<string>();
             this.Tags = new ChangeableProperty<string>();
-            this.Homepage = new ValidatedChangeableProperty<string>("Home page", true, ValidatorFactory.ValidateUrl(false));
+            this.PackageUrl = new ValidatedChangeableProperty<string>("Home page", true, ValidatorFactory.ValidateUrl(false));
             this.Description = new ChangeableProperty<string>();
             this.MinOSVersion = new ValidatedChangeableProperty<string>("Minimum OS version", true, ValidatorFactory.ValidateVersion(false));
             this.Url = new ValidatedChangeableProperty<string>("Installer URL", ValidatorFactory.ValidateUrl(true));
@@ -68,7 +68,7 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
             this.LicenseUrl = new ValidatedChangeableProperty<string>("License URL", true, ValidatorFactory.ValidateUrl(false));
             this.License = new ValidatedChangeableProperty<string>("License", true, ValidatorFactory.ValidateNotEmptyField());
             this.TabIdentity = new ChangeableContainer(this.Name, this.Publisher, this.Version, this.Id, this.ManifestVersion1, this.ManifestVersion2, this.ManifestVersion3);
-            this.TabMetadata = new ChangeableContainer(this.AppMoniker, this.Tags, this.Homepage, this.Description, this.MinOSVersion);
+            this.TabMetadata = new ChangeableContainer(this.AppMoniker, this.Tags, this.PackageUrl, this.Description, this.MinOSVersion);
             this.TabDownloads = new ChangeableContainer(this.Url, this.Sha256);
             this.TabInstaller = new WingetInstallerViewModel(this.YamlUtils, this.interactionService) { Url = this.Url.CurrentValue };
             this.TabLicense = new ChangeableContainer(this.License, this.LicenseUrl);
@@ -147,7 +147,7 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
 
         public ChangeableProperty<string> Tags { get; }
 
-        public ValidatedChangeableProperty<string> Homepage { get; }
+        public ValidatedChangeableProperty<string> PackageUrl { get; }
 
         public ChangeableProperty<string> Description { get; }
 
@@ -203,7 +203,7 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
         
         public Task NewManifest(CancellationToken cancellationToken)
         {
-            var newItem = new YamlDefinition();
+            var newItem = new YamlManifest();
 
             this.SetData(newItem);
 
@@ -334,106 +334,106 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
             }
         }
 
-        private void SetData(YamlDefinition definition, bool useNullValues = true)
+        private void SetData(YamlManifest manifest, bool useNullValues = true)
         {
             this.autoId = true;
-            this.model = definition;
+            this.model = manifest;
 
-            if (useNullValues || !string.IsNullOrEmpty(definition.License))
+            if (useNullValues || !string.IsNullOrEmpty(manifest.License))
             {
-                this.License.CurrentValue = definition.License;
+                this.License.CurrentValue = manifest.License;
             }
 
-            if (useNullValues || !string.IsNullOrEmpty(definition.LicenseUrl))
+            if (useNullValues || !string.IsNullOrEmpty(manifest.LicenseUrl))
             {
-                this.LicenseUrl.CurrentValue = definition.LicenseUrl;
+                this.LicenseUrl.CurrentValue = manifest.LicenseUrl;
             }
 
-            if (useNullValues || !string.IsNullOrEmpty(definition.Name))
+            if (useNullValues || !string.IsNullOrEmpty(manifest.PackageName))
             {
-                this.Name.CurrentValue = definition.Name;
+                this.Name.CurrentValue = manifest.PackageName;
             }
             
-            if (useNullValues || !string.IsNullOrEmpty(definition.Version))
+            if (useNullValues || !string.IsNullOrEmpty(manifest.PackageVersion))
             {
-                this.Version.CurrentValue = definition.Version;
+                this.Version.CurrentValue = manifest.PackageVersion;
             }
 
-            if (useNullValues || !string.IsNullOrEmpty(definition.Publisher))
+            if (useNullValues || !string.IsNullOrEmpty(manifest.Publisher))
             {
-                this.Publisher.CurrentValue = definition.Publisher;
+                this.Publisher.CurrentValue = manifest.Publisher;
             }
 
-            if (useNullValues || !string.IsNullOrEmpty(definition.License))
+            if (useNullValues || !string.IsNullOrEmpty(manifest.License))
             {
-                this.License.CurrentValue = definition.License;
+                this.License.CurrentValue = manifest.License;
             }
 
-            if (useNullValues || !string.IsNullOrEmpty(definition.AppMoniker))
+            if (useNullValues || !string.IsNullOrEmpty(manifest.Moniker))
             {
-                this.AppMoniker.CurrentValue = definition.AppMoniker;
+                this.AppMoniker.CurrentValue = manifest.Moniker;
             }
 
-            if (useNullValues || !string.IsNullOrEmpty(definition.Tags))
+            if (useNullValues || manifest.Tags?.Any() == true)
             {
-                this.Tags.CurrentValue = definition.Tags;
+                this.Tags.CurrentValue = manifest.Tags == null ? null : string.Join(",", manifest.Tags);
             }
 
-            if (useNullValues || !string.IsNullOrEmpty(definition.Description))
+            if (useNullValues || !string.IsNullOrEmpty(manifest.ShortDescription))
             {
-                this.Description.CurrentValue = definition.Description;
+                this.Description.CurrentValue = manifest.ShortDescription;
             }
 
-            if (useNullValues || !string.IsNullOrEmpty(definition.Homepage))
+            if (useNullValues || !string.IsNullOrEmpty(manifest.PackageUrl))
             {
-                this.Homepage.CurrentValue = definition.Homepage;
+                this.PackageUrl.CurrentValue = manifest.PackageUrl;
             }
 
-            if (useNullValues || definition.MinOperatingSystemVersion != default)
+            if (useNullValues || manifest.MinimumOperatingSystemVersion != default)
             {
-                this.MinOSVersion.CurrentValue = definition.MinOperatingSystemVersion?.ToString();
+                this.MinOSVersion.CurrentValue = manifest.MinimumOperatingSystemVersion?.ToString();
             }
 
-            if (useNullValues || !string.IsNullOrEmpty(definition.Id))
+            if (useNullValues || !string.IsNullOrEmpty(manifest.PackageIdentifier))
             {
-                this.Id.CurrentValue = definition.Id;
+                this.Id.CurrentValue = manifest.PackageIdentifier;
             }
 
-            this.ShowManifestVersion = definition.ManifestVersion != default;
+            this.ShowManifestVersion = manifest.ManifestVersion != default;
             this.OnPropertyChanged(nameof(ShowManifestVersion));
 
-            if (definition.ManifestVersion != null)
+            if (manifest.ManifestVersion != null)
             {
-                this.ManifestVersion1.CurrentValue = definition.ManifestVersion.Major.ToString("0");
-                this.ManifestVersion2.CurrentValue = definition.ManifestVersion.Minor.ToString("0");
-                this.ManifestVersion3.CurrentValue = definition.ManifestVersion.Build.ToString("0");
+                this.ManifestVersion1.CurrentValue = manifest.ManifestVersion.Major.ToString("0");
+                this.ManifestVersion2.CurrentValue = manifest.ManifestVersion.Minor.ToString("0");
+                this.ManifestVersion3.CurrentValue = manifest.ManifestVersion.Build.ToString("0");
             }
 
-            if (definition.Installers?.Any() == true)
+            if (manifest.Installers?.Any() == true)
             {
-                var installer = definition.Installers.First();
+                var installer = manifest.Installers.First();
                 this.TabInstaller.SetData(installer, useNullValues);
 
-                if (useNullValues || installer.Url != null)
+                if (useNullValues || installer.InstallerUrl != null)
                 {
-                    this.Url.CurrentValue = installer?.Url;
+                    this.Url.CurrentValue = installer?.InstallerUrl;
                 }
 
-                if (useNullValues || installer.Sha256 != null)
+                if (useNullValues || installer.InstallerSha256 != null)
                 {
-                    this.Sha256.CurrentValue = installer?.Sha256;
+                    this.Sha256.CurrentValue = installer?.InstallerSha256;
                 }
             }
             else
             {
                 var newItem = new YamlInstaller
                 {
-                    InstallerType = YamlInstallerType.msix,
-                    Arch = YamlArchitecture.x64,
-                    Scope = YamlScope.machine
+                    InstallerType = YamlInstallerType.Msix,
+                    Architecture = YamlArchitecture.X64,
+                    Scope = YamlScope.Machine
                 };
                 
-                definition.Installers = new List<YamlInstaller> { newItem };
+                manifest.Installers = new List<YamlInstaller> { newItem };
                 this.TabInstaller.SetData(newItem);
             }
 
@@ -447,16 +447,16 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
                 return false;
             }
 
-            this.model.Name = this.Name.CurrentValue;
-            this.model.AppMoniker = this.AppMoniker.CurrentValue;
-            this.model.Description = this.Description.CurrentValue;
+            this.model.PackageName = this.Name.CurrentValue;
+            this.model.Moniker = this.AppMoniker.CurrentValue;
+            this.model.ShortDescription = this.Description.CurrentValue;
             this.model.License = this.License.CurrentValue;
-            this.model.Homepage = this.Homepage.CurrentValue;
-            this.model.Id = this.Id.CurrentValue;
+            this.model.PackageUrl = this.PackageUrl.CurrentValue;
+            this.model.PackageIdentifier = this.Id.CurrentValue;
             this.model.Publisher = this.Publisher.CurrentValue;
-            this.model.MinOperatingSystemVersion = string.IsNullOrEmpty(this.MinOSVersion.CurrentValue) ? null : System.Version.Parse(this.MinOSVersion.CurrentValue);
-            this.model.Tags = this.Tags.CurrentValue;
-            this.model.Version = this.Version.CurrentValue;
+            this.model.MinimumOperatingSystemVersion = string.IsNullOrEmpty(this.MinOSVersion.CurrentValue) ? null : System.Version.Parse(this.MinOSVersion.CurrentValue);
+            this.model.Tags = this.Tags.CurrentValue == null ? new List<string>() : this.Tags.CurrentValue.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+            this.model.PackageVersion = this.Version.CurrentValue;
             this.model.LicenseUrl = this.LicenseUrl.CurrentValue;
 
             if (!string.IsNullOrEmpty(this.ManifestVersion1.CurrentValue) || !string.IsNullOrEmpty(this.ManifestVersion2.CurrentValue) || !string.IsNullOrEmpty(this.ManifestVersion3.CurrentValue))
@@ -485,8 +485,8 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
             }
             
             this.TabInstaller.Commit();
-            this.model.Installers[0].Url = this.Url.CurrentValue;
-            this.model.Installers[0].Sha256 = this.Sha256.CurrentValue;
+            this.model.Installers[0].InstallerUrl = this.Url.CurrentValue;
+            this.model.Installers[0].InstallerSha256 = this.Sha256.CurrentValue;
             
             var fileInfo = new FileInfo(fileName);
             if (fileInfo.Directory != null && !fileInfo.Directory.Exists)
