@@ -23,6 +23,9 @@ namespace Otor.MsixHero.Winget.Yaml.Entities
     /// </remarks>
     public enum YamlPlatform
     {
+        [System.Runtime.Serialization.EnumMember(Value = "")]
+        None,
+        
         [System.Runtime.Serialization.EnumMember(Value = "Windows.Desktop")]
         WindowsDesktop,
         

@@ -51,27 +51,30 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
         {
             this.interactionService = interactionService;
 
-            this.Name = new ValidatedChangeableProperty<string>("Package name", true, ValidatorFactory.ValidateNotEmptyField());
-            this.Publisher = new ValidatedChangeableProperty<string>("Package publisher", true, ValidatorFactory.ValidateNotEmptyField());
-            this.Version = new ValidatedChangeableProperty<string>("Version", true, ValidatorFactory.ValidateVersion(true));
-            this.Id = new ValidatedChangeableProperty<string>("Package identifier", true, ValidateId);
+            this.Name = new ValidatedChangeableProperty<string>("Package name", true, WingetValidators.GetPackageNameError);
+            this.Publisher = new ValidatedChangeableProperty<string>("Package publisher", true, WingetValidators.GetPublisherError);
+            this.Version = new ValidatedChangeableProperty<string>("Version", true, WingetValidators.GetPackageVersionError);
+            this.Id = new ValidatedChangeableProperty<string>("Package identifier", true, WingetValidators.GetPackageIdentifierError);
             this.ManifestVersion1 = new ValidatedChangeableProperty<string>("Manifest version", true, ValidatorFactory.ValidateInteger(false, "Major version"));
             this.ManifestVersion2 = new ValidatedChangeableProperty<string>("Manifest version", true, ValidatorFactory.ValidateInteger(false, "Minor version"));
             this.ManifestVersion3 = new ValidatedChangeableProperty<string>("Manifest version", true, ValidatorFactory.ValidateInteger(false, "Revision"));
             this.AppMoniker = new ChangeableProperty<string>();
             this.Tags = new ChangeableProperty<string>();
             this.PackageUrl = new ValidatedChangeableProperty<string>("Home page", true, ValidatorFactory.ValidateUrl(false));
+            this.ShortDescription = new ChangeableProperty<string>();
             this.Description = new ChangeableProperty<string>();
             this.MinOSVersion = new ValidatedChangeableProperty<string>("Minimum OS version", true, ValidatorFactory.ValidateVersion(false));
             this.Url = new ValidatedChangeableProperty<string>("Installer URL", ValidatorFactory.ValidateUrl(true));
             this.Sha256 = new ValidatedChangeableProperty<string>("Installer hash", ValidatorFactory.ValidateSha256(true));
+            this.CopyrightUrl = new ValidatedChangeableProperty<string>("Copyright URL", true, ValidatorFactory.ValidateUrl(false));
+            this.Copyright = new ValidatedChangeableProperty<string>("Copyright", true, WingetValidators.GetCopyrightError);
             this.LicenseUrl = new ValidatedChangeableProperty<string>("License URL", true, ValidatorFactory.ValidateUrl(false));
-            this.License = new ValidatedChangeableProperty<string>("License", true, ValidatorFactory.ValidateNotEmptyField());
+            this.License = new ValidatedChangeableProperty<string>("License", true, WingetValidators.GetLicenseError);
             this.TabIdentity = new ChangeableContainer(this.Name, this.Publisher, this.Version, this.Id, this.ManifestVersion1, this.ManifestVersion2, this.ManifestVersion3);
-            this.TabMetadata = new ChangeableContainer(this.AppMoniker, this.Tags, this.PackageUrl, this.Description, this.MinOSVersion);
+            this.TabMetadata = new ChangeableContainer(this.AppMoniker, this.Tags, this.PackageUrl, this.Description, this.ShortDescription, this.MinOSVersion);
             this.TabDownloads = new ChangeableContainer(this.Url, this.Sha256);
             this.TabInstaller = new WingetInstallerViewModel(this.YamlUtils, this.interactionService) { Url = this.Url.CurrentValue };
-            this.TabLicense = new ChangeableContainer(this.License, this.LicenseUrl);
+            this.TabLicense = new ChangeableContainer(this.License, this.LicenseUrl, this.Copyright, this.CopyrightUrl);
 
             this.AddChildren(
                 this.TabIdentity,
@@ -144,13 +147,19 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
         public ValidatedChangeableProperty<string> MinOSVersion { get; }
 
         public ValidatedChangeableProperty<string> License { get; }
+        
+        public ValidatedChangeableProperty<string> Copyright { get; }
 
         public ChangeableProperty<string> Tags { get; }
 
         public ValidatedChangeableProperty<string> PackageUrl { get; }
 
+        public ChangeableProperty<string> ShortDescription { get; }
+        
         public ChangeableProperty<string> Description { get; }
 
+        public ValidatedChangeableProperty<string> CopyrightUrl { get; }
+        
         public ValidatedChangeableProperty<string> LicenseUrl { get; }
         
         public WingetInstallerViewModel TabInstaller { get; }
@@ -344,11 +353,21 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
                 this.License.CurrentValue = manifest.License;
             }
 
+            if (useNullValues || !string.IsNullOrEmpty(manifest.Copyright))
+            {
+                this.Copyright.CurrentValue = manifest.Copyright;
+            }
+
+            if (useNullValues || !string.IsNullOrEmpty(manifest.CopyrightUrl))
+            {
+                this.CopyrightUrl.CurrentValue = manifest.CopyrightUrl;
+            }
+            
             if (useNullValues || !string.IsNullOrEmpty(manifest.LicenseUrl))
             {
                 this.LicenseUrl.CurrentValue = manifest.LicenseUrl;
             }
-
+            
             if (useNullValues || !string.IsNullOrEmpty(manifest.PackageName))
             {
                 this.Name.CurrentValue = manifest.PackageName;
@@ -363,12 +382,7 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
             {
                 this.Publisher.CurrentValue = manifest.Publisher;
             }
-
-            if (useNullValues || !string.IsNullOrEmpty(manifest.License))
-            {
-                this.License.CurrentValue = manifest.License;
-            }
-
+            
             if (useNullValues || !string.IsNullOrEmpty(manifest.Moniker))
             {
                 this.AppMoniker.CurrentValue = manifest.Moniker;
@@ -381,7 +395,12 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
 
             if (useNullValues || !string.IsNullOrEmpty(manifest.ShortDescription))
             {
-                this.Description.CurrentValue = manifest.ShortDescription;
+                this.ShortDescription.CurrentValue = manifest.ShortDescription;
+            }
+
+            if (useNullValues || !string.IsNullOrEmpty(manifest.Description))
+            {
+                this.Description.CurrentValue = manifest.Description;
             }
 
             if (useNullValues || !string.IsNullOrEmpty(manifest.PackageUrl))
@@ -449,14 +468,17 @@ namespace Otor.MsixHero.App.Modules.Dialogs.WinGet.YamlEditor.ViewModel
 
             this.model.PackageName = this.Name.CurrentValue;
             this.model.Moniker = this.AppMoniker.CurrentValue;
-            this.model.ShortDescription = this.Description.CurrentValue;
+            this.model.ShortDescription = this.ShortDescription.CurrentValue;
+            this.model.Description = this.Description.CurrentValue;
             this.model.License = this.License.CurrentValue;
+            this.model.Copyright = this.Copyright.CurrentValue;
             this.model.PackageUrl = this.PackageUrl.CurrentValue;
             this.model.PackageIdentifier = this.Id.CurrentValue;
             this.model.Publisher = this.Publisher.CurrentValue;
             this.model.MinimumOperatingSystemVersion = string.IsNullOrEmpty(this.MinOSVersion.CurrentValue) ? null : System.Version.Parse(this.MinOSVersion.CurrentValue);
             this.model.Tags = this.Tags.CurrentValue == null ? new List<string>() : this.Tags.CurrentValue.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
             this.model.PackageVersion = this.Version.CurrentValue;
+            this.model.CopyrightUrl = this.CopyrightUrl.CurrentValue;
             this.model.LicenseUrl = this.LicenseUrl.CurrentValue;
 
             if (!string.IsNullOrEmpty(this.ManifestVersion1.CurrentValue) || !string.IsNullOrEmpty(this.ManifestVersion2.CurrentValue) || !string.IsNullOrEmpty(this.ManifestVersion3.CurrentValue))

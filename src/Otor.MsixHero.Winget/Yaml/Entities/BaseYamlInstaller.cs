@@ -46,7 +46,7 @@ namespace Otor.MsixHero.Winget.Yaml.Entities
         //   "description": "The installer supported operating system"
         // }
         [YamlMember(DefaultValuesHandling = DefaultValuesHandling.OmitDefaults)]
-        public YamlPlatform Platform { get; set; }
+        public List<YamlPlatform> Platform { get; set; }
 
         //  {
         //    "type": [ "string", "null" ],
@@ -116,7 +116,7 @@ namespace Otor.MsixHero.Winget.Yaml.Entities
         //   "description": "List of supported installer modes"
         // }
         [YamlMember(DefaultValuesHandling = DefaultValuesHandling.OmitDefaults)]
-        public YamlInstallMode InstallModes { get; set; }
+        public List<YamlInstallMode> InstallModes { get; set; }
 
         // {
         //   "type": "object"

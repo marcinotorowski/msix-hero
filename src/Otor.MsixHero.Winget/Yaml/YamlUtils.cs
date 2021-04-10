@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -26,6 +27,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Otor.MsixHero.Appx.Packaging;
 using Otor.MsixHero.Appx.Packaging.Manifest;
+using Otor.MsixHero.Appx.Packaging.Manifest.Entities;
 using Otor.MsixHero.Appx.Packaging.Manifest.Enums;
 using Otor.MsixHero.Appx.Packaging.Manifest.FileReaders;
 using Otor.MsixHero.Infrastructure.Cryptography;
@@ -236,9 +238,9 @@ namespace Otor.MsixHero.Winget.Yaml
             yaml.PackageIdentifier = (yaml.Publisher + "." + yaml.PackageName).Replace(" ", string.Empty);
             yaml.Installers[0].InstallerSha256 = await this.CalculateHashAsync(new FileInfo(filePath), cancellationToken).ConfigureAwait(false);
             
-            if (yaml.License != null && yaml.License.IndexOf("Copy", StringComparison.OrdinalIgnoreCase) == -1 && yaml.License.IndexOf("(C)", StringComparison.OrdinalIgnoreCase) == -1 && yaml.License.IndexOf("http", StringComparison.OrdinalIgnoreCase) == -1)
+            if (yaml.Copyright != null && yaml.Copyright.IndexOf("Copy", StringComparison.OrdinalIgnoreCase) == -1 && yaml.Copyright.IndexOf("(C)", StringComparison.OrdinalIgnoreCase) == -1 && yaml.Copyright.IndexOf("http", StringComparison.OrdinalIgnoreCase) == -1)
             {
-                yaml.License = "Copyright (C) " + yaml.License;
+                yaml.Copyright = "Copyright (C) " + yaml.Copyright;
             }
 
             return yaml;
@@ -248,15 +250,17 @@ namespace Otor.MsixHero.Winget.Yaml
         {
             var msiProps = new Msi().GetProperties(filePath);
 
+            var lcid = msiProps.TryGetValue("ProductLanguage", out var language) ? language : null;
+            
             var yamlDefinition = new YamlManifest
             {
-                PackageName = msiProps.TryGetValue("ProductName", out var pn) ? pn : null,
-                PackageVersion = msiProps.TryGetValue("ProductVersion", out var pv) ? pv : null,
-                Publisher = msiProps.TryGetValue("Manufacturer", out var pm) ? pm : null,
-                ShortDescription = msiProps.TryGetValue("ARPCOMMENTS", out var arpc) ? arpc : null,
-                License = msiProps.TryGetValue("ARPCONTACT", out var arpcont) ? arpcont : null,
-                LicenseUrl = msiProps.TryGetValue("ARPURLINFOABOUT", out var arpurl) || msiProps.TryGetValue("ARPHELPLINK", out arpurl) ? arpurl : null,
-                // Language = msiProps.TryGetValue("ProductLanguage", out var pl) ? pl : null,
+                PackageName = msiProps.TryGetValue("ProductName", out var name  ) ? name   : null,
+                PackageVersion = msiProps.TryGetValue("ProductVersion", out var version ) ? version  : null,
+                Publisher = msiProps.TryGetValue("Manufacturer", out var publisher) ? publisher : null,
+                ShortDescription = msiProps.TryGetValue("ARPCOMMENTS", out var comments ) ? comments  : null,
+                PublisherUrl = msiProps.TryGetValue("ARPCONTACT", out var contactUrl) ? contactUrl : null,
+                CopyrightUrl = msiProps.TryGetValue("ARPURLINFOABOUT", out var url) ? url : null,
+                PublisherSupportUrl = msiProps.TryGetValue("ARPHELPLINK", out var supportUrl) ? supportUrl : null,
                 Installers = new List<YamlInstaller>
                 {
                     new YamlInstaller
@@ -264,23 +268,39 @@ namespace Otor.MsixHero.Winget.Yaml
                         InstallerType = YamlInstallerType.Msi,
                         Scope = msiProps.TryGetValue("ALLUSERS", out var allUsers) && allUsers == "1" ? YamlScope.Machine : YamlScope.None,
                         Architecture = msiProps.TryGetValue("Template", out var template) && (template.IndexOf("Intel64", StringComparison.OrdinalIgnoreCase) != -1 || template.IndexOf("x64", StringComparison.OrdinalIgnoreCase) != -1 || template.IndexOf("amd64", StringComparison.OrdinalIgnoreCase) != -1) ? YamlArchitecture.X64 : YamlArchitecture.X86,
-                        Platform = YamlPlatform.WindowsDesktop
+                        Platform = new List<YamlPlatform>() { YamlPlatform.WindowsDesktop },
+                        ProductCode = msiProps.TryGetValue("ProductCode", out var productCode) ? productCode : null,
+                        // InstallModes = new List<YamlInstallMode> {YamlInstallMode.Interactive, YamlInstallMode.Silent, YamlInstallMode.SilentWithProgress },
                     }
                 }
             };
 
-            if (yamlDefinition.License != null)
+            if (lcid != null && int.TryParse(lcid, out var lcidCode))
             {
-                yamlDefinition.License = yamlDefinition.License.Trim();
-                if (string.IsNullOrWhiteSpace(yamlDefinition.License))
+                try
                 {
-                    yamlDefinition.License = null;
+                    var culture = CultureInfo.GetCultureInfo(lcid);
+                    yamlDefinition.PackageLocale = culture.Name.ToLowerInvariant();
+                    yamlDefinition.Installers[0].InstallerLocale = culture.Name.ToLowerInvariant();
+                }
+                catch
+                {
+                    // could not get culture by LCID.
+                }
+            }
+
+            if (yamlDefinition.Copyright != null)
+            {
+                yamlDefinition.Copyright = yamlDefinition.Copyright.Trim();
+                if (string.IsNullOrWhiteSpace(yamlDefinition.Copyright))
+                {
+                    yamlDefinition.Copyright = null;
                 }
 
-                yamlDefinition.License = yamlDefinition.License.Trim();
-                if (string.IsNullOrWhiteSpace(yamlDefinition.LicenseUrl))
+                yamlDefinition.Copyright = yamlDefinition.Copyright.Trim();
+                if (string.IsNullOrWhiteSpace(yamlDefinition.CopyrightUrl))
                 {
-                    yamlDefinition.LicenseUrl = null;
+                    yamlDefinition.CopyrightUrl = null;
                 }
             }
             
@@ -307,12 +327,12 @@ namespace Otor.MsixHero.Winget.Yaml
                 }
             };
 
-            if (yamlDefinition.License != null)
+            if (yamlDefinition.Copyright != null)
             {
-                yamlDefinition.License = yamlDefinition.License.Trim();
-                if (string.IsNullOrWhiteSpace(yamlDefinition.License))
+                yamlDefinition.Copyright = yamlDefinition.Copyright.Trim();
+                if (string.IsNullOrWhiteSpace(yamlDefinition.Copyright))
                 {
-                    yamlDefinition.License = null;
+                    yamlDefinition.Copyright = null;
                 }
             }
 
@@ -343,6 +363,7 @@ namespace Otor.MsixHero.Winget.Yaml
                 yamlDefinition.Installers[0].Architecture = YamlArchitecture.X64;
             }
 
+            yamlDefinition.Installers[0].Platform = new List<YamlPlatform>() { YamlPlatform.WindowsDesktop };
             return yamlDefinition;
         }
 
@@ -360,68 +381,59 @@ namespace Otor.MsixHero.Winget.Yaml
                 }
             };
 
-            IAppxFileReader reader;
-
-            if (filePath.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+            using IAppxFileReader reader = FileReaderFactory.CreateFileReader(filePath);
+            try
             {
-                reader = new FileInfoFileReaderAdapter(filePath);
+                yamlDefinition.Installers[0].SignatureSha256 = await this.CalculateSignatureHashAsync(new FileInfo(filePath), cancellationToken).ConfigureAwait(false);
             }
-            else
+            catch (ArgumentException)
             {
-                reader = new ZipArchiveFileReaderAdapter(filePath);
+            }
+                
+            var manifestReader = new AppxManifestReader();
+            var details = await manifestReader.Read(reader, cancellationToken).ConfigureAwait(false);
 
-                try
+            yamlDefinition.PackageName = details.DisplayName;
+            yamlDefinition.Publisher = details.PublisherDisplayName;
+            yamlDefinition.PackageVersion = details.Version;
+            yamlDefinition.ShortDescription = details.Description;
+            yamlDefinition.Installers[0].Capabilities = details.Capabilities?.Where(c => c.Type == CapabilityType.General || c.Type == CapabilityType.Device).Select(c => c.Name).ToList();
+            yamlDefinition.Installers[0].RestrictedCapabilities = details.Capabilities?.Where(c => c.Type == CapabilityType.Restricted).Select(c => c.Name).ToList();
+
+            if (details.Applications?.Any() == true)
+            {
+                // Exclude some unrelated PSF stuff - they are not the right choice for the app moniker.
+                var candidateForAppMoniker = details.Applications.Select(a => a.Executable)
+                    .FirstOrDefault(a => 
+                        !string.IsNullOrEmpty(a) && !a.StartsWith("psf", StringComparison.OrdinalIgnoreCase) &&
+                        !a.StartsWith("AI_stubs", StringComparison.OrdinalIgnoreCase) &&
+                        a.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+
+                yamlDefinition.Platform = new List<YamlPlatform>() { details.Applications.Any(a => a.EntryPoint == "Windows.FullTrustApplication") ? YamlPlatform.WindowsDesktop : YamlPlatform.WindowsUniversal };
+                
+                if (!string.IsNullOrEmpty(candidateForAppMoniker))
                 {
-                    yamlDefinition.Installers[0].SignatureSha256 = await this.CalculateSignatureHashAsync(new FileInfo(filePath), cancellationToken).ConfigureAwait(false);
-                }
-                catch (ArgumentException)
-                {
+                    yamlDefinition.Moniker = candidateForAppMoniker.Substring(0, candidateForAppMoniker.Length - ".exe".Length).Split('\\', '/').Last();
                 }
             }
 
-            using (reader)
+            switch (details.ProcessorArchitecture)
             {
-                var manifestReader = new AppxManifestReader();
-                var details = await manifestReader.Read(reader, cancellationToken).ConfigureAwait(false);
-
-                yamlDefinition.PackageName = details.DisplayName;
-                yamlDefinition.Publisher = details.PublisherDisplayName;
-                yamlDefinition.PackageVersion = details.Version;
-                yamlDefinition.ShortDescription = details.Description;
-
-                if (details.Applications?.Any() == true)
-                {
-                    // Exclude some unrelated PSF stuff - they are not the right choice for the app moniker.
-                    var candidateForAppMoniker = details.Applications.Select(a => a.Executable)
-                        .FirstOrDefault(a => 
-                            !string.IsNullOrEmpty(a) && !a.StartsWith("psf", StringComparison.OrdinalIgnoreCase) &&
-                            !a.StartsWith("AI_stubs", StringComparison.OrdinalIgnoreCase) &&
-                            a.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
-
-                    if (!string.IsNullOrEmpty(candidateForAppMoniker))
-                    {
-                        yamlDefinition.Moniker = candidateForAppMoniker.Substring(0, candidateForAppMoniker.Length - ".exe".Length).Split('\\', '/').Last();
-                    }
-                }
-
-                switch (details.ProcessorArchitecture)
-                {
-                    case AppxPackageArchitecture.Arm:
-                        yamlDefinition.Installers[0].Architecture = YamlArchitecture.Arm;
-                        break;
-                    case AppxPackageArchitecture.Neutral:
-                        yamlDefinition.Installers[0].Architecture = YamlArchitecture.Neutral;
-                        break;
-                    case AppxPackageArchitecture.Arm64:
-                        yamlDefinition.Installers[0].Architecture = YamlArchitecture.Arm64;
-                        break;
-                    case AppxPackageArchitecture.x86:
-                        yamlDefinition.Installers[0].Architecture = YamlArchitecture.X86;
-                        break;
-                    case AppxPackageArchitecture.x64:
-                        yamlDefinition.Installers[0].Architecture = YamlArchitecture.X64;
-                        break;
-                }
+                case AppxPackageArchitecture.Arm:
+                    yamlDefinition.Installers[0].Architecture = YamlArchitecture.Arm;
+                    break;
+                case AppxPackageArchitecture.Neutral:
+                    yamlDefinition.Installers[0].Architecture = YamlArchitecture.Neutral;
+                    break;
+                case AppxPackageArchitecture.Arm64:
+                    yamlDefinition.Installers[0].Architecture = YamlArchitecture.Arm64;
+                    break;
+                case AppxPackageArchitecture.x86:
+                    yamlDefinition.Installers[0].Architecture = YamlArchitecture.X86;
+                    break;
+                case AppxPackageArchitecture.x64:
+                    yamlDefinition.Installers[0].Architecture = YamlArchitecture.X64;
+                    break;
             }
 
             return yamlDefinition;
