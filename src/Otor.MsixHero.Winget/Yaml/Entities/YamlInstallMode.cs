@@ -14,8 +14,6 @@
 // Full notice:
 // https://github.com/marcinotorowski/msix-hero/blob/develop/LICENSE.md
 
-using YamlDotNet.Serialization;
-
 namespace Otor.MsixHero.Winget.Yaml.Entities
 {
     /// <remarks>
@@ -23,16 +21,16 @@ namespace Otor.MsixHero.Winget.Yaml.Entities
     /// </remarks>
     public enum YamlInstallMode
     {
-        [YamlMember(Alias = "none")]
+        [System.Runtime.Serialization.EnumMember(Value = "")]
         None = 0,
-
-        [YamlMember(Alias = "interactive")]
+        
+        [System.Runtime.Serialization.EnumMember(Value = "interactive")]
         Interactive,
-
-        [YamlMember(Alias = "silent")]
+        
+        [System.Runtime.Serialization.EnumMember(Value = "silent")]
         Silent,
         
-        [YamlMember(Alias = "silentWithProgress")]
+        [System.Runtime.Serialization.EnumMember(Value = "silentWithProgress")]
         SilentWithProgress
     }
 }

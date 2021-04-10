@@ -53,11 +53,14 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task WriteAsync(YamlManifest manifest, TextWriter textWriter, CancellationToken cancellationToken = default)
         {
-            var serializerBuilder = new SerializerBuilder().WithEmissionPhaseObjectGraphVisitor(args => new DefaultExclusiveObjectGraphVisitor(args.InnerVisitor));
+            var serializerBuilder = new SerializerBuilder()
+                .WithEmissionPhaseObjectGraphVisitor(args => new DefaultExclusiveObjectGraphVisitor(args.InnerVisitor))
+                .WithTypeConverter(new YamlStringEnumConverter());
+            
             var serializer = serializerBuilder.Build();
             
             var stringBuilder = new StringBuilder();
-            using (var stringWriter = new StringWriter(stringBuilder))
+            await using (var stringWriter = new StringWriter(stringBuilder))
             {
                 serializer.Serialize(stringWriter, manifest);
             }

@@ -14,9 +14,6 @@
 // Full notice:
 // https://github.com/marcinotorowski/msix-hero/blob/develop/LICENSE.md
 
-using System.Management.Automation;
-using YamlDotNet.Serialization;
-
 namespace Otor.MsixHero.Winget.Yaml.Entities
 {
     /// <remarks>
@@ -24,41 +21,41 @@ namespace Otor.MsixHero.Winget.Yaml.Entities
     /// </remarks>
     public enum YamlInstallerType
     {
-        [YamlMember(Alias = "none")]
+        [System.Runtime.Serialization.EnumMember(Value = "")]
         None = 0,
-        
-        [YamlMember(Alias = "exe")]
+
+        [System.Runtime.Serialization.EnumMember(Value = "exe")]
         Exe,
-        
-        [YamlMember(Alias = "msi")]
+
+        [System.Runtime.Serialization.EnumMember(Value = "msi")]
         Msi,
-        
-        [YamlMember(Alias = "msix")]
+
+        [System.Runtime.Serialization.EnumMember(Value = "msix")]
         Msix,
-        
+
         // ReSharper disable once StringLiteralTypo
-        [YamlMember(Alias = "inno")]
+        [System.Runtime.Serialization.EnumMember(Value = "inno")]
         // ReSharper disable once IdentifierTypo
         InnoSetup,
 
-        [YamlMember(Alias = "wix")]
+        [System.Runtime.Serialization.EnumMember(Value = "wix")]
         Wix,
-        
         // ReSharper disable once StringLiteralTypo
-        [YamlMember(Alias = "nullsoft")]
+
+        [System.Runtime.Serialization.EnumMember(Value = "nullsoft")]
         // ReSharper disable once IdentifierTypo
         Nullsoft,
-        
-        [YamlMember(Alias = "appx")]
+
+        [System.Runtime.Serialization.EnumMember(Value = "appx")]
         Appx,
-        
-        [YamlMember(Alias = "zip")]
+
+        [System.Runtime.Serialization.EnumMember(Value = "zip")]
         Zip,
-        
-        [YamlMember(Alias = "burn")]
+
+        [System.Runtime.Serialization.EnumMember(Value = "burn")]
         Burn,
-        
-        [YamlMember(Alias = "pwa")]
+
+        [System.Runtime.Serialization.EnumMember(Value = "pwa")]
         ProgressiveWebApp
     }
 }

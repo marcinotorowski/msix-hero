@@ -23,10 +23,10 @@ namespace Otor.MsixHero.Winget.Yaml.Entities
     /// </remarks>
     public enum YamlPlatform
     {
-        [YamlMember(Alias = "Windows.Desktop")]
+        [System.Runtime.Serialization.EnumMember(Value = "Windows.Desktop")]
         WindowsDesktop,
-
-        [YamlMember(Alias = "Windows.Universal")]
+        
+        [System.Runtime.Serialization.EnumMember(Value = "Windows.Universal")]
         WindowsUniversal
     }
 }

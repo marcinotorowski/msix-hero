@@ -20,27 +20,22 @@ namespace Otor.MsixHero.Winget.Yaml.Entities
 {
     public enum YamlArchitecture
     {
-        // ReSharper disable once InconsistentNaming
-        [YamlMember(Alias = "none")]
+        [System.Runtime.Serialization.EnumMember(Value = "")]
         None = 0,
-
-        // ReSharper disable once InconsistentNaming
-        [YamlMember(Alias = "x64")]
+        
+        [System.Runtime.Serialization.EnumMember(Value = "x64")]
         X64,
-
-        // ReSharper disable once InconsistentNaming
-        [YamlMember(Alias = "x86")]
+        
+        [System.Runtime.Serialization.EnumMember(Value = "x86")]
         X86,
-
-        // ReSharper disable once InconsistentNaming
-        [YamlMember(Alias = "arm")]
+        
+        [System.Runtime.Serialization.EnumMember(Value = "arm")]
         Arm,
-
-        // ReSharper disable once InconsistentNaming
-        [YamlMember(Alias = "arm64")]
+        
+        [System.Runtime.Serialization.EnumMember(Value = "arm64")]
         Arm64,
         
-        [YamlMember(Alias = "neutral")]
+        [System.Runtime.Serialization.EnumMember(Value = "neutral")]
         Neutral
     }
 }

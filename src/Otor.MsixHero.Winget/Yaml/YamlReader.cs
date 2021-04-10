@@ -63,10 +63,8 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <returns>The WinGet definition.</returns>
         public YamlManifest Read(Stream stream)
         {
-            using (var textReader = new StreamReader(stream, leaveOpen: true))
-            {
-                return this.Read(textReader);
-            }
+            using var textReader = new StreamReader(stream, leaveOpen: true);
+            return this.Read(textReader);
         }
 
 
@@ -77,7 +75,7 @@ namespace Otor.MsixHero.Winget.Yaml
         /// <returns>The WinGet definition.</returns>
         public YamlManifest Read(TextReader textReader)
         {
-            var deserializerBuilder = new DeserializerBuilder().IgnoreUnmatchedProperties();
+            var deserializerBuilder = new DeserializerBuilder().IgnoreUnmatchedProperties().WithTypeConverter(new YamlStringEnumConverter());
             var deserializer = deserializerBuilder.Build();
             return deserializer.Deserialize<YamlManifest>(textReader);
         }

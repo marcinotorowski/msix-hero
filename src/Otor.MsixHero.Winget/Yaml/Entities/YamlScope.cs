@@ -23,13 +23,13 @@ namespace Otor.MsixHero.Winget.Yaml.Entities
     /// </remarks>
     public enum YamlScope
     {
-        [YamlMember(Alias = "none")]
+        [System.Runtime.Serialization.EnumMember(Value = "")]
         None = 0,
-
-        [YamlMember(Alias = "user")]
+        
+        [System.Runtime.Serialization.EnumMember(Value = "user")]
         User,
-
-        [YamlMember(Alias = "machine")]
+        
+        [System.Runtime.Serialization.EnumMember(Value = "machine")]
         Machine
     }
 }

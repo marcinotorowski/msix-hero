@@ -14,8 +14,6 @@
 // Full notice:
 // https://github.com/marcinotorowski/msix-hero/blob/develop/LICENSE.md
 
-using YamlDotNet.Serialization;
-
 namespace Otor.MsixHero.Winget.Yaml.Entities
 {
     /// <remarks>
@@ -23,14 +21,13 @@ namespace Otor.MsixHero.Winget.Yaml.Entities
     /// </remarks>
     public enum YamlUpgradeBehavior
     {
-        // ReSharper disable once InconsistentNaming
-        [YamlMember]
-        none = 0,
+        [System.Runtime.Serialization.EnumMember(Value = "")]
+        None = 0,
         
-        [YamlMember(Alias = "install")]
+        [System.Runtime.Serialization.EnumMember(Value = "install")]
         Install,
         
-        [YamlMember(Alias = "uninstallPrevious")]
+        [System.Runtime.Serialization.EnumMember(Value = "uninstallPrevious")]
         UninstallPrevious
     }
 }
