@@ -453,6 +453,41 @@
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>
+
+                <TabItem
+                    Header="Registry"
+                    Style="{StaticResource Compact}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="5*" />
+                        </Grid.ColumnDefinitions>
+                        <TreeView 
+                            DataContextChanged="FrameworkElement_OnDataContextChanged"
+                            SelectedItemChanged="OnRegistrySelectionChanged"
+                            TreeViewItem.Expanded="OnRegistryExpanded">
+                        </TreeView>
+                        <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" Width="20" VerticalAlignment="Stretch" />
+                        <ListView Grid.Column="2" x:Name="Values">
+                            <ListView.View>
+                                <GridView>
+                                    <GridView.Columns>
+                                        <GridViewColumn 
+                                            Header="Name"
+                                            DisplayMemberBinding="{Binding Name}" />
+                                        <GridViewColumn 
+                                            Header="Type"
+                                            DisplayMemberBinding="{Binding Type}" />
+                                        <GridViewColumn 
+                                            Header="Data"
+                                            DisplayMemberBinding="{Binding Data}" />
+                                    </GridView.Columns>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </Grid>
+                </TabItem>
             </TabControl>
         </TabItem>
         <TabItem Header="PSF" Tag="{Binding PackageSupportFramework.CurrentValue}">

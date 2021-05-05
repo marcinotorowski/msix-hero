@@ -22,6 +22,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items;
+using Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Registry;
 using Otor.MsixHero.App.Controls.PsfContent.ViewModel;
 using Otor.MsixHero.App.Helpers;
 using Otor.MsixHero.App.Modules.PackageManagement.PackageList.ViewModels;
@@ -83,51 +84,50 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
 
         public async Task Load()
         {
-            using (var cts = new CancellationTokenSource())
-            {
-                using (var reader = FileReaderFactory.CreateFileReader(this.packagePath))
-                {
-                    var canElevate = await UserHelper.IsAdministratorAsync(cts.Token) || await this.interProcessCommunicationManager.Test(cts.Token);
-                    var progress = new Progress<ProgressData>();
+            using var cts = new CancellationTokenSource();
+            using var reader = FileReaderFactory.CreateFileReader(this.packagePath);
+            var canElevate = await UserHelper.IsAdministratorAsync(cts.Token) || await this.interProcessCommunicationManager.Test(cts.Token);
+            var progress = new Progress<ProgressData>();
 
-                    // Load manifest
-                    var taskLoadPackage = this.LoadManifest(reader, cts.Token);
+            // Load manifest
+            var taskLoadPackage = this.LoadManifest(reader, cts.Token);
 
-                    // Load certificate trust
-                    var taskLoadSignature = this.Trust.LoadSignature(cts.Token);
+            // Load certificate trust
+            var taskLoadSignature = this.Trust.LoadSignature(cts.Token);
 
-                    // Load PSF
-                    var manifest = await taskLoadPackage.ConfigureAwait(false);
-                    var taskPsf = this.LoadPsf(reader, manifest);
-
-                    // Load add-ons
-                    var taskAddOns = this.GetAddOns(manifest, cts.Token);
-
-                    // Load drive
-                    // var taskDisk = this.Disk.Load(this.LoadDisk());
-
-                    // Load users
-                    Task<FoundUsersViewModel> taskUsers;
-                    try
-                    {
-                        taskUsers = this.GetUsers(manifest, canElevate, cts.Token);
-                    }
-                    catch (Exception)
-                    {
-                        taskUsers = this.GetUsers(manifest, false, cts.Token);
-                    }
-
-                    await this.Manifest.Load(Task.FromResult(new PackageExpertPropertiesViewModel(manifest, this.packagePath))).ConfigureAwait(false);
-                    await this.PackageSupportFramework.Load(taskPsf).ConfigureAwait(false);
-                    await this.AddOns.Load(taskAddOns).ConfigureAwait(false);
-                    await this.Users.Load(taskUsers).ConfigureAwait(false);
+            // Load PSF
+            var manifest = await taskLoadPackage.ConfigureAwait(false);
+            var taskPsf = this.LoadPsf(reader, manifest);
                     
-                    // Wait for them all
-                    var allTasks = Task.WhenAll(taskLoadPackage, taskLoadSignature, taskPsf, taskAddOns, taskUsers);
-                    this.Progress.MonitorProgress(allTasks, cts, progress);
-                    await allTasks;
-                }
+            // Load add-ons
+            var taskAddOns = this.GetAddOns(manifest, cts.Token);
+
+            // Load drive
+            // var taskDisk = this.Disk.Load(this.LoadDisk());
+
+            // Load users
+            Task<FoundUsersViewModel> taskUsers;
+            try
+            {
+                taskUsers = this.GetUsers(manifest, canElevate, cts.Token);
             }
+            catch (Exception)
+            {
+                taskUsers = this.GetUsers(manifest, false, cts.Token);
+            }
+
+            await this.Manifest.Load(Task.FromResult(new PackageExpertPropertiesViewModel(manifest, this.packagePath))).ConfigureAwait(false);
+            await this.PackageSupportFramework.Load(taskPsf).ConfigureAwait(false);
+            await this.AddOns.Load(taskAddOns).ConfigureAwait(false);
+            await this.Users.Load(taskUsers).ConfigureAwait(false);
+
+            this.Registry = new AppxRegistryViewModel(this.packagePath);
+            this.OnPropertyChanged(nameof(this.Registry));
+            
+            // Wait for them all
+            var allTasks = Task.WhenAll(taskLoadPackage, taskLoadSignature, taskPsf, taskAddOns, taskUsers);
+            this.Progress.MonitorProgress(allTasks, cts, progress);
+            await allTasks;
         }
 
         public async Task<PackageDriveViewModel> LoadDisk()
@@ -139,6 +139,8 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
 
         public TrustViewModel Trust { get; }
 
+        public AppxRegistryViewModel Registry { get; private set; }
+        
         public AsyncProperty<PackageDriveViewModel> Disk { get; } = new AsyncProperty<PackageDriveViewModel>();
 
         public AsyncProperty<PackageExpertPropertiesViewModel> Manifest { get; } = new AsyncProperty<PackageExpertPropertiesViewModel>();
@@ -213,7 +215,7 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
 
             return list;
         }
-
+        
         // ReSharper disable once MemberCanBeMadeStatic.Local
         private async Task<PsfContentViewModel> LoadPsf(IAppxFileReader source, AppxPackage manifest)
         {
