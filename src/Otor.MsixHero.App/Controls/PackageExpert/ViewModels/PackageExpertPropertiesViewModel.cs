@@ -104,7 +104,6 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
             }
             
             this.Capabilities = new CapabilitiesViewModel(model.Capabilities);
-            this.Registry = new AppxRegistryViewModel(filePath);
             this.PackageIntegrity = model.PackageIntegrity;
             
             this.UserDirectory = Path.Combine("%localappdata%", "Packages", this.FamilyName, "LocalCache");
@@ -256,8 +255,6 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
 
         public CapabilitiesViewModel Capabilities { get; }
         
-        public AppxRegistryViewModel Registry { get; }
-
         public string PackageFullName { get; }
 
         public string Description { get; }

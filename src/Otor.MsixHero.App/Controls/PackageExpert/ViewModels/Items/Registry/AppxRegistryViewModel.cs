@@ -24,7 +24,7 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Registry
         
         public async Task<IList<AppxRegistryKeyViewModel>> GetRoots()
         {
-            if (!this.IsRegistryAvailable)
+            if (!this.CheckIfRegistryAvailable())
             {
                 return null;
             }
@@ -36,7 +36,13 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Registry
             using var reader = new AppxRegistryReader(registry);
             await foreach (var root in reader.EnumerateKeys(AppxRegistryRoots.Root).ConfigureAwait(false))
             {
-                roots.Add(new AppxRegistryKeyViewModel(this, root));
+                var rootViewModel = new AppxRegistryKeyViewModel(this, root);
+                if (root.HasSubKeys)
+                {
+                    rootViewModel.Children.Add(null); // dummy
+                }
+                
+                roots.Add(rootViewModel);
             }
 
             return roots;

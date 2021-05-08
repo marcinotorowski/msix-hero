@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Otor.MsixHero.App.Mvvm;
 using Otor.MsixHero.Appx.Packaging.Registry;
 
@@ -47,8 +49,27 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Registry
         public bool IsExpanded
         {
             get => this.isExpanded;
-            set => this.SetField(ref this.isExpanded, value);
+            set 
+            {
+                this.SetField(ref this.isExpanded, value);
+                if (value)
+                {
+                    this.HandleExpansion();
+                }
+            }
         }
+
+        private async void HandleExpansion()
+        {
+            this.Children.Clear();
+            
+            await foreach (var subKey in this.GetSubKeys().ConfigureAwait(true))
+            {
+                this.Children.Add(subKey);
+            }
+        }
+
+        public ObservableCollection<AppxRegistryKeyViewModel> Children { get; private set; } = new ObservableCollection<AppxRegistryKeyViewModel>();
 
         public async IAsyncEnumerable<AppxRegistryKeyViewModel> GetSubKeys([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
@@ -62,7 +83,13 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Registry
             using var appxRegistryReader = new AppxRegistryReader(registry);
             await foreach (var key in appxRegistryReader.EnumerateKeys(this.Path, cancellationToken))
             {
-                yield return new AppxRegistryKeyViewModel(this.parent, key);
+                var subKey = new AppxRegistryKeyViewModel(this.parent, key);
+                if (key.HasSubKeys)
+                {
+                    subKey.Children.Add(null); // dummy element
+                }
+                
+                yield return subKey;
             }
         }
         
@@ -81,6 +108,11 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Registry
             {
                 yield return new AppxRegistryValueViewModel(value);
             }
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
         }
     }
 }
