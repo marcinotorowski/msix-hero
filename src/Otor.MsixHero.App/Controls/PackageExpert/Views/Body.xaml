@@ -20,6 +20,8 @@
              xmlns:volume="clr-namespace:Otor.MsixHero.App.Controls.Volume"
              xmlns:elements="clr-namespace:Otor.MsixHero.App.Modules.PackageManagement.PackageList.ViewModels"
              xmlns:interop="clr-namespace:Otor.MsixHero.App.Helpers.Interop"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:Otor.MsixHero.App.Helpers.Behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance viewModels:PackageExpertViewModel}">
 
@@ -440,7 +442,53 @@
                             <Path Width="32" Height="32" Fill="{StaticResource MsixHero.Brushes.Accent}" Data="{StaticResource VectorBrowse}" />
                         </Viewbox>
                     </TabItem.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="2*" />
+                        </Grid.ColumnDefinitions>
+                        <TreeView 
+                            ItemsSource="{Binding Files.Containers.CurrentValue}">
+                            <b:Interaction.Behaviors>
+                                <behaviors:MvvmSelectedItemBehavior SelectedItem="{Binding Files.SelectedContainer}" />
+                            </b:Interaction.Behaviors>
+                            <TreeView.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding Containers}">
+                                    <DockPanel>
+                                        <Image Margin="2 0"  VerticalAlignment="Center" Source="{x:Static interop:WindowsIcons.FolderSmall}" Width="16" Height="16" SnapsToDevicePixels="True" UseLayoutRounding="True" />
+                                        <TextBlock VerticalAlignment="Center" Margin="4 4" Text="{Binding}" />
+                                    </DockPanel>
+                                </HierarchicalDataTemplate>
+                            </TreeView.ItemTemplate>
+                            <TreeView.ItemContainerStyle>
+                                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </Style>
+                            </TreeView.ItemContainerStyle>
+                        </TreeView>
 
+                        <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" Width="20" VerticalAlignment="Stretch" />
+
+                        <ListView 
+                            
+                            SelectionMode="Single"
+                            SelectedItem="{Binding Files.SelectedNode}"
+                            Grid.Column="2" x:Name="Files" 
+                            ItemsSource="{Binding Files.Nodes}">
+                            <ListView.View>
+                                <GridView>
+                                    <GridView.Columns>
+                                        <GridViewColumn 
+                                            Header="Name"
+                                            Width="200"
+                                            DisplayMemberBinding="{Binding Name}" />
+                                    </GridView.Columns>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </Grid>
                 </TabItem>
 
                 <TabItem>
@@ -456,9 +504,12 @@
                             <ColumnDefinition Width="2*" />
                         </Grid.ColumnDefinitions>
                         <TreeView 
-                            ItemsSource="{Binding Registry.RootRegistries.CurrentValue}">
+                            ItemsSource="{Binding Registry.Containers.CurrentValue}">
+                            <b:Interaction.Behaviors>
+                                <behaviors:MvvmSelectedItemBehavior SelectedItem="{Binding Registry.SelectedContainer}" />
+                            </b:Interaction.Behaviors>
                             <TreeView.ItemTemplate>
-                                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                <HierarchicalDataTemplate ItemsSource="{Binding Containers}">
                                     <DockPanel>
                                         <Image Margin="2 0"  VerticalAlignment="Center" Source="{x:Static interop:WindowsIcons.FolderSmall}" Width="16" Height="16" SnapsToDevicePixels="True" UseLayoutRounding="True" />
                                         <TextBlock VerticalAlignment="Center" Margin="4 4" Text="{Binding}" />
@@ -467,6 +518,7 @@
                             </TreeView.ItemTemplate>
                             <TreeView.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 </Style>
                             </TreeView.ItemContainerStyle>
@@ -474,18 +526,25 @@
 
                         <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" Width="20" VerticalAlignment="Stretch" />
 
-                        <ListView Grid.Column="2" x:Name="Values">
+                        <ListView 
+                            Grid.Column="2" 
+                            x:Name="Values" 
+                            SelectionMode="Single"
+                            SelectedItem="{Binding Registry.SelectedNode}"
+                            ItemsSource="{Binding Registry.Nodes}">
                             <ListView.View>
                                 <GridView>
                                     <GridView.Columns>
                                         <GridViewColumn 
                                             Header="Name"
+                                            Width="150"
                                             DisplayMemberBinding="{Binding Name}" />
                                         <GridViewColumn 
                                             Header="Type"
                                             DisplayMemberBinding="{Binding Type}" />
                                         <GridViewColumn 
                                             Header="Data"
+                                            Width="150"
                                             DisplayMemberBinding="{Binding Data}" />
                                     </GridView.Columns>
                                 </GridView>

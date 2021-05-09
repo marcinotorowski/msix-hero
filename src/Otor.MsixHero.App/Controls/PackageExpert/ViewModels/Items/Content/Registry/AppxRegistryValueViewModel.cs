@@ -1,12 +1,13 @@
 ﻿using Otor.MsixHero.Appx.Packaging.Registry;
 
-namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Registry
+namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Content.Registry
 {
-    public class AppxRegistryValueViewModel
+    public class AppxRegistryValueViewModel : TreeNodeViewModel
     {
         public AppxRegistryValueViewModel(AppxRegistryValue value)
         {
             this.Name = value.Name;
+            this.Path = value.Path;
             
             if (value.Type != "RegNone")
             {
@@ -14,8 +15,6 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Registry
                 this.Data = value.Data;
             }
         }
-        
-        public string Name { get; }
         
         public string Type { get; }
         

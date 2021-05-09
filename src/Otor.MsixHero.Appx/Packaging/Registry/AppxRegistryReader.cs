@@ -48,11 +48,20 @@ namespace Otor.MsixHero.Appx.Packaging.Registry
             }
             
             var key = await this.GetRegistry(registryKeyPath, cancellationToken).ConfigureAwait(false);
+            if (key == null)
+            {
+                yield break;
+            }
+            
             cancellationToken.ThrowIfCancellationRequested();
             
             foreach (var subKey in key.SubKeys.Select(sk => sk.KeyPath))
             {
                 var subKeyInstance = await this.GetRegistry(subKey, cancellationToken).ConfigureAwait(false);
+                if (subKeyInstance == null)
+                {
+                    continue;
+                }
                 
                 yield return new AppxRegistryKey
                 {
@@ -71,15 +80,21 @@ namespace Otor.MsixHero.Appx.Packaging.Registry
             }
 
             var key = await this.GetRegistry(registryKeyPath, cancellationToken).ConfigureAwait(false);
-            cancellationToken.ThrowIfCancellationRequested();
+            if (key == null)
+            {
+                yield break;
+            }
             
             foreach (var value in key.Values)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 yield return new AppxRegistryValue
                 {
                     Name = value.ValueName,
                     Type = value.ValueType,
-                    Data = value.ValueData
+                    Data = value.ValueData,
+                    Path = registryKeyPath
                 };
 
             }
@@ -112,13 +127,7 @@ namespace Otor.MsixHero.Appx.Packaging.Registry
                 throw new InvalidOperationException("At this point of time, the stream must be already a FileStream or a MemoryStream.");
             }
             
-            var key = reg.GetKey(registryKeyPath);
-            if (key == null)
-            {
-                throw new KeyNotFoundException("Registry key " + registryKeyPath + " was not found.");
-            }
-
-            return key;
+            return reg.GetKey(registryKeyPath);
         }
 
         private static Stream GetSupportedStream(Stream stream)

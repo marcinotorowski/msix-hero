@@ -19,7 +19,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items;
-using Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Registry;
 using Otor.MsixHero.App.Mvvm;
 using Otor.MsixHero.Appx.Packaging;
 using Otor.MsixHero.Appx.Packaging.Installation.Enums;

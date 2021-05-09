@@ -22,12 +22,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items;
-using Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Registry;
+using Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Content.Files;
+using Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Content.Registry;
 using Otor.MsixHero.App.Controls.PsfContent.ViewModel;
 using Otor.MsixHero.App.Helpers;
 using Otor.MsixHero.App.Modules.PackageManagement.PackageList.ViewModels;
 using Otor.MsixHero.App.Mvvm;
-using Otor.MsixHero.Appx.Diagnostic.RunningDetector;
 using Otor.MsixHero.Appx.Packaging;
 using Otor.MsixHero.Appx.Packaging.Installation;
 using Otor.MsixHero.Appx.Packaging.Installation.Enums;
@@ -46,7 +46,6 @@ using Otor.MsixHero.Infrastructure.Progress;
 using Otor.MsixHero.Infrastructure.Services;
 using Otor.MsixHero.Lib.Domain.State;
 using Prism.Commands;
-using Prism.Services.Dialogs;
 
 namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
 {
@@ -55,8 +54,6 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
         private readonly IInterProcessCommunicationManager interProcessCommunicationManager;
         private readonly ISelfElevationProxyProvider<IAppxPackageManager> appxPackageManagerProvider;
         private readonly ISelfElevationProxyProvider<IAppxVolumeManager> appxVolumeManagerProvider;
-        private readonly IRunningAppsDetector runningDetector;
-        private readonly IDialogService dialogService;
         private readonly string packagePath;
         private ICommand findUsers;
 
@@ -66,16 +63,12 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
             ISelfElevationProxyProvider<IAppxPackageManager> appxPackageManagerProvider,
             ISelfElevationProxyProvider<IAppxVolumeManager> appxVolumeManagerProvider,
             ISelfElevationProxyProvider<ISigningManager> signManager,
-            IInteractionService interactionService,
-            IRunningAppsDetector runningDetector,
-            IDialogService dialogService)
+            IInteractionService interactionService)
         {
             this.interProcessCommunicationManager = interProcessCommunicationManager;
             this.appxPackageManagerProvider = appxPackageManagerProvider;
             this.appxVolumeManagerProvider = appxVolumeManagerProvider;
-            this.runningDetector = runningDetector;
             this.packagePath = packagePath;
-            this.dialogService = dialogService;
 
             this.Trust = new TrustViewModel(packagePath, interactionService, signManager);
         }
@@ -124,6 +117,9 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
             this.Registry = new AppxRegistryViewModel(this.packagePath);
             this.OnPropertyChanged(nameof(this.Registry));
             
+            this.Files = new AppxFilesViewModel(this.packagePath);
+            this.OnPropertyChanged(nameof(this.Files));
+            
             // Wait for them all
             var allTasks = Task.WhenAll(taskLoadPackage, taskLoadSignature, taskPsf, taskAddOns, taskUsers);
             this.Progress.MonitorProgress(allTasks, cts, progress);
@@ -140,6 +136,8 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
         public TrustViewModel Trust { get; }
 
         public AppxRegistryViewModel Registry { get; private set; }
+        
+        public AppxFilesViewModel Files { get; private set; }
         
         public AsyncProperty<PackageDriveViewModel> Disk { get; } = new AsyncProperty<PackageDriveViewModel>();
 
