@@ -20,6 +20,14 @@ namespace Otor.MsixHero.App.Helpers.Interop
         
         public static BitmapSource FolderSmall => GetWindowsIcon(new WindowsIconKey(SHSIID_FOLDER, SHGSI_SMALLICON));
 
+        public static BitmapSource DocumentLarge => GetWindowsIcon(new WindowsIconKey(SHSIID_DOCUMENT, SHGSI_LARGEICON));
+        
+        public static BitmapSource DocumentSmall => GetWindowsIcon(new WindowsIconKey(SHSIID_DOCUMENT, SHGSI_SMALLICON));
+        
+        public static BitmapSource SettingsLarge => GetWindowsIcon(new WindowsIconKey(SHSIID_SETTINGS, SHGSI_LARGEICON));
+        
+        public static BitmapSource SettingsSmall => GetWindowsIcon(new WindowsIconKey(SHSIID_SETTINGS, SHGSI_SMALLICON));
+        
         private static BitmapSource GetWindowsIcon(WindowsIconKey icon)
         {
             if (icons.TryGetValue(icon, out var source))
@@ -85,11 +93,23 @@ namespace Otor.MsixHero.App.Helpers.Interop
         [Obfuscation(Exclude = true)]
         private static extern bool DestroyIcon(IntPtr handle);
         
+        [DllImport("Shell32.dll")]
+        public static extern IntPtr SHGetFileInfo(
+            string pszPath,
+            uint dwFileAttributes,
+            ref ShellIcon.SHFILEINFO psfi,
+            uint cbFileInfo,
+            uint uFlags);
+        
         [DllImport("gdi32.dll", SetLastError = true)]
         [Obfuscation(Exclude = true)]
         private static extern bool DeleteObject(IntPtr hObject);
+
+        private const uint SHSIID_DOCUMENT = 1;
         
-        private const uint SHSIID_FOLDER = 0x3;
+        private const uint SHSIID_FOLDER = 3;
+        
+        private const uint SHSIID_SETTINGS = 55;
         
         private const uint SHGSI_ICON = 0x100;
         

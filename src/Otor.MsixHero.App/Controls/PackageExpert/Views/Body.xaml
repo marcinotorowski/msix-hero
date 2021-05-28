@@ -446,7 +446,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="4*" />
                         </Grid.ColumnDefinitions>
                         <TreeView 
                             ItemsSource="{Binding Files.Containers.CurrentValue}">
@@ -456,8 +456,8 @@
                             <TreeView.ItemTemplate>
                                 <HierarchicalDataTemplate ItemsSource="{Binding Containers}">
                                     <DockPanel>
-                                        <Image Margin="2 0"  VerticalAlignment="Center" Source="{x:Static interop:WindowsIcons.FolderSmall}" Width="16" Height="16" SnapsToDevicePixels="True" UseLayoutRounding="True" />
-                                        <TextBlock VerticalAlignment="Center" Margin="4 4" Text="{Binding}" />
+                                        <Image Margin="2 -2"  VerticalAlignment="Center" Source="{x:Static interop:WindowsIcons.FolderSmall}" Width="16" Height="16" SnapsToDevicePixels="True" UseLayoutRounding="True" />
+                                        <TextBlock TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4 2" Text="{Binding}" />
                                     </DockPanel>
                                 </HierarchicalDataTemplate>
                             </TreeView.ItemTemplate>
@@ -472,18 +472,38 @@
                         <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" Width="20" VerticalAlignment="Stretch" />
 
                         <ListView 
-                            
                             SelectionMode="Single"
                             SelectedItem="{Binding Files.SelectedNode}"
                             Grid.Column="2" x:Name="Files" 
+                            Tag="{Binding Files.Nodes, FallbackValue=0, TargetNullValue=0}"
                             ItemsSource="{Binding Files.Nodes}">
+                            <ListView.Style>
+                                <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="ListView">
+                                    <Style.Triggers>
+                                        <Trigger Property="Tag">
+                                            <Trigger.Value>
+                                                <system:Int32>0</system:Int32>
+                                            </Trigger.Value>
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.Style>
                             <ListView.View>
                                 <GridView>
                                     <GridView.Columns>
                                         <GridViewColumn 
                                             Header="Name"
-                                            Width="200"
-                                            DisplayMemberBinding="{Binding Name}" />
+                                            Width="200">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <DockPanel>
+                                                        <Image Margin="2 -2"  VerticalAlignment="Center" Source="{x:Static interop:WindowsIcons.DocumentSmall}" Width="16" Height="16" SnapsToDevicePixels="True" UseLayoutRounding="True" />
+                                                        <TextBlock TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4 2" Text="{Binding Name}" />
+                                                    </DockPanel>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
                                     </GridView.Columns>
                                 </GridView>
                             </ListView.View>
@@ -501,7 +521,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="4*" />
                         </Grid.ColumnDefinitions>
                         <TreeView 
                             ItemsSource="{Binding Registry.Containers.CurrentValue}">
@@ -529,23 +549,54 @@
                         <ListView 
                             Grid.Column="2" 
                             x:Name="Values" 
+                            Tag="{Binding Registry.Nodes, FallbackValue=0, TargetNullValue=0}"
                             SelectionMode="Single"
                             SelectedItem="{Binding Registry.SelectedNode}"
                             ItemsSource="{Binding Registry.Nodes}">
+                            <ListView.Style>
+                                <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="ListView">
+                                    <Style.Triggers>
+                                        <Trigger Property="Tag">
+                                            <Trigger.Value>
+                                                <system:Int32>0</system:Int32>
+                                            </Trigger.Value>
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.Style>
                             <ListView.View>
                                 <GridView>
                                     <GridView.Columns>
                                         <GridViewColumn 
                                             Header="Name"
-                                            Width="150"
-                                            DisplayMemberBinding="{Binding Name}" />
+                                            Width="150">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <DockPanel>
+                                                        <Image Margin="3 -2" VerticalAlignment="Center" Source="{x:Static interop:WindowsIcons.SettingsSmall}" Width="16" Height="16" SnapsToDevicePixels="True" UseLayoutRounding="True" />
+                                                        <TextBlock TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="3 2" Text="{Binding Name}" />
+                                                    </DockPanel>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
                                         <GridViewColumn 
-                                            Header="Type"
-                                            DisplayMemberBinding="{Binding Type}" />
+                                            Header="Type">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="3 2" Text="{Binding Type}" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
                                         <GridViewColumn 
                                             Header="Data"
-                                            Width="150"
-                                            DisplayMemberBinding="{Binding Data}" />
+                                            Width="150">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="3 2" Text="{Binding Data}" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
                                     </GridView.Columns>
                                 </GridView>
                             </ListView.View>

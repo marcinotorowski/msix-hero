@@ -68,9 +68,11 @@
     <Style TargetType="{x:Type TreeViewItem}">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
-        <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
         <Setter Property="Padding" Value="0,0,0,0"/>
-        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        <Setter Property="MinHeight" Value="26" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource MsixHero.Brushes.Foreground}"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -82,7 +84,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition MinHeight="26" Height="Auto"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         
@@ -157,17 +159,19 @@
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="BorderBrush" Value="{StaticResource MsixHero.Brushes.Light4}" />
-        <Setter Property="BorderThickness" Value="0 0 0 1" />
-        <Setter Property="Padding" Value="8" />
-        <Setter Property="Foreground" Value="{StaticResource MsixHero.Brushes.Foreground}" />
+        <Setter Property="BorderThickness" Value="0 " />
+        <Setter Property="Padding" Value="6 3" />
+        <Setter Property="MinHeight" Value="26" />
+        <Setter Property="Foreground" Value="{StaticResource MsixHero.Brushes.Light2}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
-                    <Border BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" Background="Transparent">
+                    <Border 
+                        BorderThickness="{TemplateBinding BorderThickness}" 
+                        BorderBrush="{TemplateBinding BorderBrush}" 
+                        Background="{TemplateBinding Background}">
                         <DockPanel>
-
-                            <Border Width="1" IsHitTestVisible="False" Background="{TemplateBinding BorderBrush}" SnapsToDevicePixels="True" DockPanel.Dock="Right" Margin="0 0 5 0" />
 
                             <Thumb 
                                 x:Name="PART_HeaderGripper"
@@ -178,8 +182,9 @@
                                 Style="{StaticResource ColumnHeaderGripperStyle}" />
 
                             <TextBlock 
-                                Margin="{TemplateBinding Padding}" x:Name="ContentHeader" 
-                                Text="{TemplateBinding Content, Converter={StaticResource UppercaseConverter}}" 
+                                Margin="{TemplateBinding Padding}" x:Name="ContentHeader"
+                                Text="{TemplateBinding Content}" 
+                                TextTrimming="CharacterEllipsis"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                 TextAlignment="{TemplateBinding HorizontalContentAlignment}" />
@@ -191,7 +196,6 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource MsixHero.Brushes.Accent.Light1}" />
                 <Setter Property="Foreground" Value="{StaticResource MsixHero.Brushes.Foreground}" />
             </Trigger>
         </Style.Triggers>
@@ -230,4 +234,107 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style TargetType="{x:Type DataGridRow}">
+        <Setter Property="Background" Value="#FFFFFF" />
+        <Setter Property="SnapsToDevicePixels" Value="true"/>
+        <Setter Property="Validation.ErrorTemplate" Value="{x:Null}" />
+        <Setter Property="ValidationErrorTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <TextBlock Margin="2,0,0,0" VerticalAlignment="Center" Foreground="Red" Text="!" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DataGridRow}">
+                    <Grid>
+                        <Rectangle Visibility="Collapsed" x:Name="Focus" Fill="{StaticResource MsixHero.Brushes.Accent.Light2}" />
+
+                        <Border x:Name="DGR_Border"
+                                Background="Transparent"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="True">
+
+                            <SelectiveScrollingGrid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <DataGridCellsPresenter Grid.Column="1"
+                                        ItemsPanel="{TemplateBinding ItemsPanel}"
+                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+
+                                <DataGridDetailsPresenter  SelectiveScrollingGrid.SelectiveScrollingOrientation="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=AreRowDetailsFrozen, Converter={x:Static DataGrid.RowDetailsScrollingConverter}, ConverterParameter={x:Static SelectiveScrollingOrientation.Vertical}}"
+                                        Grid.Column="1" Grid.Row="1"
+                                        Visibility="{TemplateBinding DetailsVisibility}" />
+
+                                <DataGridRowHeader 
+                                    SelectiveScrollingGrid.SelectiveScrollingOrientation="Vertical"
+                                    Grid.Row="0" 
+                                    Grid.RowSpan="2" 
+                                    Grid.Column="0"
+                                    Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=HeadersVisibility, Converter={x:Static DataGrid.HeadersVisibilityConverter}, ConverterParameter={x:Static DataGridHeadersVisibility.Row}}"/>
+                            </SelectiveScrollingGrid>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Visibility" Value="Visible" TargetName="Focus" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type DataGridCellsPresenter}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DataGridCellsPresenter}">
+                    <ItemsPresenter />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type DataGridCell}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DataGridCell}">
+                    <Border Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}"  
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Rectangle Fill="{StaticResource MsixHero.Brushes.Accent}" x:Name="FocusNormal" Visibility="Collapsed" />
+                            <Rectangle Fill="#66ffffff" x:Name="FocusKeyboard" Visibility="Collapsed" />
+                            <ContentPresenter Margin="2" VerticalAlignment="Center" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Visibility" TargetName="FocusNormal" Value="Visible" />
+                            <Setter Property="Foreground" Value="#FFFFFF" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter Property="Visibility" TargetName="FocusKeyboard" Value="Visible" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
