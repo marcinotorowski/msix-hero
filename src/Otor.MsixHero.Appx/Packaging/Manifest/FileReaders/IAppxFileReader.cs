@@ -29,9 +29,9 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
 
         IAsyncEnumerable<string> EnumerateDirectories(string rootRelativePath = null, CancellationToken cancellationToken = default);
         
-        IAsyncEnumerable<string> EnumerateFiles(string rootRelativePath, string wildcard, SearchOption searchOption = SearchOption.TopDirectoryOnly, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<AppxFileInfo> EnumerateFiles(string rootRelativePath, string wildcard, SearchOption searchOption = SearchOption.TopDirectoryOnly, CancellationToken cancellationToken = default);
 
-        IAsyncEnumerable<string> EnumerateFiles(string rootRelativePath = null, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<AppxFileInfo> EnumerateFiles(string rootRelativePath = null, CancellationToken cancellationToken = default);
 
         Stream GetResource(string resourceFilePath);
     }

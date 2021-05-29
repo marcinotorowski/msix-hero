@@ -101,7 +101,7 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
         }
 
 #pragma warning disable 1998
-        public async IAsyncEnumerable<string> EnumerateFiles(string rootRelativePath, string wildcard, SearchOption searchOption = SearchOption.TopDirectoryOnly, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<AppxFileInfo> EnumerateFiles(string rootRelativePath, string wildcard, SearchOption searchOption = SearchOption.TopDirectoryOnly, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 #pragma warning restore 1998
         {
             if (string.IsNullOrEmpty(rootRelativePath))
@@ -140,7 +140,7 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
                 {
                     if (regex == null || regex.IsMatch(fileName))
                     {
-                        yield return entry.FullName.Replace('/', Path.DirectorySeparatorChar);
+                        yield return new AppxFileInfo(entry.FullName.Replace('/', Path.DirectorySeparatorChar), entry.Length);
                     }
                 }
                 else
@@ -149,14 +149,14 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
                     {
                         if (regex == null || regex.IsMatch(fileName))
                         {
-                            yield return entry.FullName.Replace('/', Path.DirectorySeparatorChar);
+                            yield return new AppxFileInfo(entry.FullName.Replace('/', Path.DirectorySeparatorChar), entry.Length);
                         }
                     }
                 }
             }
         }
 
-        public IAsyncEnumerable<string> EnumerateFiles(string rootRelativePath = null, CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<AppxFileInfo> EnumerateFiles(string rootRelativePath = null, CancellationToken cancellationToken = default)
         {
             return this.EnumerateFiles(rootRelativePath, "*", SearchOption.TopDirectoryOnly, cancellationToken);
         }

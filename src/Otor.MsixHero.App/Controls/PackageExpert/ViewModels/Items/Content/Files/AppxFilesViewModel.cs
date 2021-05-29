@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -12,10 +13,21 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Content.File
     {
         public AppxFilesViewModel(string packageFile) : base(packageFile)
         {
-            this.Containers = new AsyncProperty<IList<AppxDirectoryViewModel>>(this.GetRootContainers());
-
+            var rootContainersTask = this.GetRootContainers();
             var nodesCollection = new ObservableCollection<AppxFileViewModel>();
             this.Nodes = nodesCollection;
+
+            var containers = new AsyncProperty<IList<AppxDirectoryViewModel>>();
+            this.Containers = containers;
+#pragma warning disable 4014
+            containers.Loaded += this.OnContainersLoaded;
+            containers.Load(rootContainersTask);
+#pragma warning restore 4014
+        }
+
+        private void OnContainersLoaded(object sender, EventArgs e)
+        {
+            this.SelectedContainer = this.Containers.CurrentValue.FirstOrDefault();
         }
 
         public override bool IsAvailable => true;

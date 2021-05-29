@@ -1,11 +1,16 @@
-﻿namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Content.Files
+﻿using Otor.MsixHero.Appx.Packaging.Manifest.FileReaders;
+
+namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items.Content.Files
 {
     public class AppxFileViewModel : TreeNodeViewModel
     {
-        public AppxFileViewModel(string fullPath)
+        public AppxFileViewModel(AppxFileInfo fileInfo)
         {
-            this.Path = fullPath;
-            this.Name = System.IO.Path.GetFileName(fullPath);
+            this.Path = fileInfo.FullPath;
+            this.Name = fileInfo.Name;
+            this.Size = fileInfo.Size;
         }
+        
+        public long Size { get; }
     }
 }

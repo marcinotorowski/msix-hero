@@ -72,12 +72,12 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
             return this.adapter.EnumerateDirectories(rootRelativePath, cancellationToken);
         }
 
-        public IAsyncEnumerable<string> EnumerateFiles(string rootRelativePath, string wildcard, SearchOption searchOption = SearchOption.TopDirectoryOnly, CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<AppxFileInfo> EnumerateFiles(string rootRelativePath, string wildcard, SearchOption searchOption = SearchOption.TopDirectoryOnly, CancellationToken cancellationToken = default)
         {
             return this.adapter.EnumerateFiles(rootRelativePath, wildcard, searchOption, cancellationToken);
         }
 
-        public IAsyncEnumerable<string> EnumerateFiles(string rootRelativePath = null, CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<AppxFileInfo> EnumerateFiles(string rootRelativePath = null, CancellationToken cancellationToken = default)
         {
             return this.adapter.EnumerateFiles(rootRelativePath, cancellationToken);
         }

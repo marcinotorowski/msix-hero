@@ -83,7 +83,7 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
         }
 
 #pragma warning disable 1998
-        public async IAsyncEnumerable<string> EnumerateFiles(string rootRelativePath, string wildcard, SearchOption searchOption = SearchOption.TopDirectoryOnly, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<AppxFileInfo> EnumerateFiles(string rootRelativePath, string wildcard, SearchOption searchOption = SearchOption.TopDirectoryOnly, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 #pragma warning restore 1998
         {
             // ReSharper disable once PossibleNullReferenceException
@@ -93,11 +93,11 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
             foreach (var f in Directory.EnumerateFiles(fullDir, wildcard, searchOption))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                yield return f;
+                yield return new AppxFileInfo(new FileInfo(f));
             }
         }
 
-        public IAsyncEnumerable<string> EnumerateFiles(string rootRelativePath = null, CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<AppxFileInfo> EnumerateFiles(string rootRelativePath = null, CancellationToken cancellationToken = default)
         {
             return this.EnumerateFiles(rootRelativePath, "*", SearchOption.TopDirectoryOnly, cancellationToken);
         }
