@@ -177,10 +177,12 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest
                 if (fileReader is IAppxDiskFileReader diskReader)
                 {
                     appxPackage.RootFolder = diskReader.RootDirectory;
+                    appxPackage.PackageFile = diskReader.RootFile;
                 }
                 else if (fileReader is ZipArchiveFileReaderAdapter zipArchiveReader)
                 {
                     appxPackage.RootFolder = Path.GetDirectoryName(zipArchiveReader.PackagePath);
+                    appxPackage.PackageFile = zipArchiveReader.PackagePath;
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();

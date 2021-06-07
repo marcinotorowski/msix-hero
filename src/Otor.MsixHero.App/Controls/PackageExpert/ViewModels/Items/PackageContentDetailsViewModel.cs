@@ -25,7 +25,7 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
 {
     public class PackageContentDetailsViewModel : NotifyPropertyChanged
     {
-        private AppxApplicationViewModel selectedFixup;
+        private AppxApplicationViewModel _selectedFixup;
 
         public PackageContentDetailsViewModel(AppxPackage model, string filePath = null)
         {
@@ -40,29 +40,8 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
             this.Version = model.Version;
             this.Logo = model.Logo;
             
-            this.OperatingSystemDependencies = new ObservableCollection<OperatingSystemDependencyViewModel>();
             this.Applications = new ObservableCollection<AppxApplicationViewModel>();
-            this.PackageDependencies = new ObservableCollection<PackageDependencyViewModel>();
             
-            if (model.OperatingSystemDependencies != null)
-            {
-                foreach (var item in model.OperatingSystemDependencies)
-                {
-                    this.OperatingSystemDependencies.Add(new OperatingSystemDependencyViewModel(item));
-                }
-            }
-
-            if (model.PackageDependencies != null)
-            {
-                foreach (var item in model.PackageDependencies)
-                {
-                    this.PackageDependencies.Add(new PackageDependencyViewModel(item));
-                }
-            }
-
-            this.HasOperatingSystemDependencies = this.OperatingSystemDependencies.Any();
-            this.HasPackageDependencies = this.PackageDependencies.Any();
-
             this.ScriptsCount = 0;
 
             if (model.Applications != null)
@@ -80,7 +59,7 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
             }
             
             this.Fixups = new ObservableCollection<AppxApplicationViewModel>(this.Applications.Where(a => a.HasPsf && a.Psf != null && (a.Psf.HasFileRedirections || a.Psf.HasTracing || a.Psf.HasOtherFixups)));
-            this.selectedFixup = this.Fixups.FirstOrDefault();
+            this._selectedFixup = this.Fixups.FirstOrDefault();
             
             // 1) fixup count is the sum of all individual file redirections...
             this.FixupsCount = this.Fixups.SelectMany(s => s.Psf.FileRedirections).Select(s => s.Exclusions.Count + s.Inclusions.Count).Sum();
@@ -94,8 +73,7 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
             {
                 this.TileColor = "#666666";
             }
-
-            this.Capabilities = new CapabilitiesViewModel(model.Capabilities);
+            
             this.PackageIntegrity = model.PackageIntegrity;
             this.RootDirectory = filePath;
         }
@@ -107,9 +85,7 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
         public bool HasAppInstallerUri => this.Model.Source is AppInstallerPackageSource;
 
         public bool PackageIntegrity { get; }
-
-        public CapabilitiesViewModel Capabilities { get; }
-
+        
         public string PackageFullName { get; }
 
         public string Description { get; }
@@ -130,22 +106,14 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
 
         public string Version { get; }
         
-        public ObservableCollection<OperatingSystemDependencyViewModel> OperatingSystemDependencies { get; }
-
-        public bool HasOperatingSystemDependencies { get; }
-
-        public bool HasPackageDependencies { get; }
-
-        public ObservableCollection<PackageDependencyViewModel> PackageDependencies { get; }
-        
         public ObservableCollection<AppxApplicationViewModel> Applications { get; }
 
         public ObservableCollection<AppxApplicationViewModel> Fixups { get; }
 
         public AppxApplicationViewModel SelectedFixup
         {
-            get => this.selectedFixup;
-            set => this.SetField(ref this.selectedFixup, value);
+            get => this._selectedFixup;
+            set => this.SetField(ref this._selectedFixup, value);
         }
 
         public BuildInfo BuildInfo { get; }

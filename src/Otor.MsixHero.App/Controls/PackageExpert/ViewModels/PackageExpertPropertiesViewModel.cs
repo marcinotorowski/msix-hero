@@ -18,19 +18,19 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using Otor.MsixHero.App.Controls.PackageExpert.Regions.Dependencies.ViewModels;
 using Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items;
 using Otor.MsixHero.App.Mvvm;
 using Otor.MsixHero.Appx.Packaging;
 using Otor.MsixHero.Appx.Packaging.Installation.Enums;
 using Otor.MsixHero.Appx.Packaging.Manifest.Entities;
-using Otor.MsixHero.Appx.Packaging.Manifest.Entities.Build;
 using Otor.MsixHero.Appx.Packaging.Manifest.Entities.Sources;
 
 namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
 {
     public class PackageExpertPropertiesViewModel : NotifyPropertyChanged
     {
-        public PackageExpertPropertiesViewModel(AppxPackage model, string filePath = null)
+        public PackageExpertPropertiesViewModel(AppxPackage model)
         {
             this.Model = model;
             this.DisplayName = model.DisplayName;
@@ -84,30 +84,28 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
 
             this.Fixups = new ObservableCollection<AppxApplicationViewModel>(this.Applications.Where(a => a.HasPsf && a.Psf != null && (a.Psf.HasFileRedirections || a.Psf.HasTracing || a.Psf.HasOtherFixups)));
             
-            // 1) fixup count is the sum of all individual file redirections...
+            // 1) fix-up count is the sum of all individual file redirections...
             this.FixupsCount = this.Fixups.SelectMany(s => s.Psf.FileRedirections).Select(s => s.Exclusions.Count + s.Inclusions.Count).Sum();
 
             // 2) plus additionally number of apps that have tracing
             this.FixupsCount += this.Applications.Count(a => a.HasPsf && a.Psf.HasTracing);
-
-            this.BuildInfo = model.BuildInfo;
-
+            
             if (string.IsNullOrEmpty(this.TileColor))
             {
                 this.TileColor = "#666666";
             }
             
-            if (filePath != null)
+            if (model.PackageFile != null)
             {
-                this.RootDirectory = filePath.Replace(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles).TrimEnd('\\'), "%programfiles%");
+                this.RootDirectory = model.PackageFile.Replace(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles).TrimEnd('\\'), "%programfiles%");
+                this.PsfFilePath = Path.Combine(model.PackageFile, "config.json");
+                this.ManifestFilePath = Path.Combine(model.PackageFile, FileConstants.AppxManifestFile);
             }
-            
-            this.Capabilities = new CapabilitiesViewModel(model.Capabilities);
+
+            this.CapabilitiesCount = model.Capabilities.Count;
             this.PackageIntegrity = model.PackageIntegrity;
             
             this.UserDirectory = Path.Combine("%localappdata%", "Packages", this.FamilyName, "LocalCache");
-            this.PsfFilePath = Path.Combine(filePath, "config.json");
-            this.ManifestFilePath = Path.Combine(filePath, FileConstants.AppxManifestFile);
 
             if (!File.Exists(this.PsfFilePath))
             {
@@ -123,6 +121,8 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
         public string RootDirectory { get; }
 
         public string UserDirectory { get; }
+
+        public int CapabilitiesCount { get; }
 
         public string PsfFilePath { get; }
 
@@ -251,8 +251,6 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
         public bool HasAppInstallerUri => this.Model.Source is AppInstallerPackageSource;
 
         public bool PackageIntegrity { get; }
-
-        public CapabilitiesViewModel Capabilities { get; }
         
         public string PackageFullName { get; }
 
@@ -286,12 +284,8 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
 
         public ObservableCollection<AppxApplicationViewModel> Fixups { get; }
         
-        public BuildInfo BuildInfo { get; }
-
         public int FixupsCount { get; }
 
         public int ScriptsCount { get; }
-
-        public bool HasBuildInfo => this.BuildInfo != null;
     }
 }

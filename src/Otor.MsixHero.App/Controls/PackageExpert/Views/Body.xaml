@@ -23,6 +23,9 @@
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:Otor.MsixHero.App.Helpers.Behaviors"
              xmlns:commands="clr-namespace:Otor.MsixHero.App.Mvvm.Commands"
+             xmlns:regions="http://prismlibrary.com/"
+             xmlns:common="clr-namespace:Otor.MsixHero.App.Controls.PackageExpert.Regions.Common"
+             xmlns:common1="clr-namespace:Otor.MsixHero.App.Controls.PackageExpert.Regions"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance viewModels:PackageExpertViewModel}">
 
@@ -35,78 +38,9 @@
                             <Path Width="32" Height="32" Fill="{StaticResource MsixHero.Brushes.Accent}" Data="{StaticResource VectorInfo}" />
                         </Viewbox>
                     </TabItem.Header>
-
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel>
-
-                            <StackPanel Margin="0 0 0 10">
-                                <TextBlock Style="{StaticResource DataHeader}" Text="Signed by" Visibility="Collapsed" />
-                                <controls:ProgressOverlay 
-                                    DataContext="{Binding Trust}"
-                                    IsShown="{Binding IsTrusting}">
-                                    <packageExpert:SignatureStatusControl 
-                                        Trustee="{Binding TrustStatus.CurrentValue.Trustee}"
-                                        TrustMeCommand="{Binding TrustMeCommand}"
-                                        ViewPropertiesCommand="{Binding ShowPropertiesCommand}"
-                                        IsTrusted="{Binding TrustStatus.CurrentValue.IsTrusted}"
-                                        IsChainLoaded="{Binding TrustStatus.IsLoading, Converter={StaticResource NegativeConverter}}"/>
-                                </controls:ProgressOverlay>
-                            </StackPanel>
-
-                            <StackPanel 
-                                DataContext="{Binding Manifest.CurrentValue}">
-                                <StackPanel Margin="0 0 0 0" VerticalAlignment="Top">
-                                    <TextBlock Style="{StaticResource DataHeader}" Text="Publisher" />
-                                    <TextBox Style="{StaticResource DataValueTextBlock}" Text="{Binding Publisher, Mode=OneWay}" TextWrapping="Wrap" />
-                                </StackPanel>
-
-                                <StackPanel Margin="0 10 0 0">
-                                    <TextBlock Style="{StaticResource DataHeader}" Text="Description" />
-                                    <TextBox Style="{StaticResource DataValueTextBlock}" Text="{Binding Description, Mode=OneWay, TargetNullValue='None', FallbackValue='None'}" TextWrapping="Wrap" />
-                                </StackPanel>
-
-                                <StackPanel Margin="0 10 0 0">
-                                    <TextBlock Style="{StaticResource DataHeader}" Text="Family name" />
-                                    <TextBox Style="{StaticResource DataValueTextBlock}" Text="{Binding Path=FamilyName, Mode=OneWay}" TextWrapping="Wrap" />
-                                </StackPanel>
-
-                                <StackPanel Margin="0 10 0 0">
-                                    <TextBlock Style="{StaticResource DataHeader}" Text="Full package name" />
-                                    <TextBox Style="{StaticResource DataValueTextBlock}" Text="{Binding Path=PackageFullName, Mode=OneWay}" TextWrapping="Wrap" />
-                                </StackPanel>
-
-                                <StackPanel Margin="0 10 0 0">
-                                    <TextBlock Style="{StaticResource DataHeader}" Text="Architecture" />
-                                    <TextBox Style="{StaticResource DataValueTextBlock}" Text="{Binding Path=Architecture, Mode=OneWay}" TextWrapping="Wrap" />
-                                </StackPanel>
-
-                                <StackPanel Margin="0 10 0 0">
-                                    <TextBlock Style="{StaticResource DataHeader}">
-                                        <Run Text="Package Integrity Enforcement" />
-                                    </TextBlock>
-                                    <TextBlock Visibility="{Binding PackageIntegrity, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource DataValue}" TextWrapping="Wrap">
-                                        <Run Text="Enforce run time package integrity checks on the entire contents of the package" />
-                                        <Hyperlink Click="HyperlinkOnClick" Tag="https://msixhero.net/redirect/package-integrity-enforcement">[more info]</Hyperlink>
-                                    </TextBlock>
-                                    <TextBlock Visibility="{Binding PackageIntegrity, Converter={StaticResource NegativeBooleanToVisibilityConverter}}" Style="{StaticResource DataValue}" TextWrapping="Wrap">
-                                        <Run Text="Default settings" />
-                                        <Hyperlink Click="HyperlinkOnClick" Tag="https://msixhero.net/redirect/package-integrity-enforcement">[more info]</Hyperlink>
-                                    </TextBlock>
-                                </StackPanel>
-                            </StackPanel>
-                            <StackPanel  
-                        DataContext="{Binding Manifest.CurrentValue}"
-                        Margin="0 10 0 0" 
-                        Visibility="{Binding HasBuildInfo, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Style="{StaticResource DataHeader}" Text="Packaging environment" />
-                                <TextBlock Style="{StaticResource DataValue}" Margin="0">
-                                    <Run Text="{Binding BuildInfo.ProductName, Mode=OneWay, TargetNullValue='Unknown product'}" />
-                                    <Run Text="{Binding BuildInfo.ProductVersion, Mode=OneWay}" />
-                                </TextBlock>
-                                <TextBlock Style="{StaticResource DataValue}" Text="{Binding BuildInfo.OperatingSystem, TargetNullValue='Unknown Operating System'}" />
-                            </StackPanel>
-                        </StackPanel>
-                    </ScrollViewer>
+                    <ContentControl 
+                        regions:RegionManager.RegionName="{x:Static common1:PackageExpertDependencies.RegionGeneral}" 
+                        regions:RegionManager.RegionContext="{Binding Manifest.CurrentValue.Model}" />
                 </TabItem>
 
                 <TabItem >
@@ -120,109 +54,17 @@
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Bottom"
                                 Margin="-3"
-                                Tag="{Binding Capabilities.Count, Mode=OneWay}"
+                                Tag="{Binding CapabilitiesCount, Mode=OneWay}"
                                 Style="{StaticResource Badge}">
                                 <TextBlock 
                                     Style="{StaticResource BadgeText}"
-                                    Text="{Binding Capabilities.Count, Mode=OneWay}" />
+                                    Text="{Binding CapabilitiesCount, Mode=OneWay}" />
                             </Border>
                         </Grid>
                     </TabItem.Header>
-                    <ContentControl Content="{Binding Manifest.CurrentValue}">
-                        <ContentControl.Style>
-                            <Style TargetType="ContentControl">
-                                <Setter Property="ContentTemplate">
-                                    <Setter.Value>
-                                        <DataTemplate DataType="viewModels:PackageExpertPropertiesViewModel">
-                                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                                <StackPanel DataContext="{Binding Capabilities}">
-                                                    <StackPanel.Resources>
-                                                        <DataTemplate x:Key="CapabilityTemplate" DataType="{x:Type elements1:CapabilityViewModel}">
-                                                            <Border Margin="4" Width="180" Height="60" Background="{StaticResource MsixHero.Brushes.Light7}">
-                                                                <DockPanel>
-                                                                    <Path VerticalAlignment="Center" Data="{Binding VectorIcon}" Margin="8 0" Style="{StaticResource LargeIcon}" />
-                                                                    <TextBlock Margin="0 0 15 0" TextWrapping="Wrap" VerticalAlignment="Center" Text="{Binding DisplayName, Mode=OneTime}" />
-                                                                </DockPanel>
-                                                            </Border>
-                                                        </DataTemplate>
-                                                    </StackPanel.Resources>
-                                                    <TextBlock Visibility="{Binding HasGeneral, Converter={StaticResource BooleanToVisibilityConverter}}" Text="General-use capabilities" Margin="0 0 0 8" />
-
-                                                    <ItemsControl Visibility="{Binding HasGeneral, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="-4 0 -4 8" ItemsSource="{Binding General}" ItemTemplate="{StaticResource CapabilityTemplate}">
-                                                        <ItemsControl.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <WrapPanel />
-                                                            </ItemsPanelTemplate>
-                                                        </ItemsControl.ItemsPanel>
-                                                    </ItemsControl>
-
-                                                    <TextBlock Visibility="{Binding HasDevice, Converter={StaticResource BooleanToVisibilityConverter}}" Text="Peripherals and internal devices" Margin="0 0 0 8" />
-
-                                                    <ItemsControl Visibility="{Binding HasDevice, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="-4 0 -4 8" ItemsSource="{Binding Device}" ItemTemplate="{StaticResource CapabilityTemplate}">
-                                                        <ItemsControl.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <WrapPanel />
-                                                            </ItemsPanelTemplate>
-                                                        </ItemsControl.ItemsPanel>
-                                                    </ItemsControl>
-
-                                                    <TextBlock Visibility="{Binding HasRestricted, Converter={StaticResource BooleanToVisibilityConverter}}" Text="Restricted capabilities" Margin="0 0 0 8" />
-
-                                                    <ItemsControl Visibility="{Binding HasRestricted, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="-4 0 -4 8" ItemsSource="{Binding Restricted}" ItemTemplate="{StaticResource CapabilityTemplate}">
-                                                        <ItemsControl.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <WrapPanel />
-                                                            </ItemsPanelTemplate>
-                                                        </ItemsControl.ItemsPanel>
-                                                    </ItemsControl>
-
-                                                    <TextBlock Visibility="{Binding HasCustom, Converter={StaticResource BooleanToVisibilityConverter}}" Text="Custom capabilities" Margin="0 0 0 8" />
-
-                                                    <ItemsControl Visibility="{Binding HasCustom, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="-4 0 -4 8" ItemsSource="{Binding Custom}" ItemTemplate="{StaticResource CapabilityTemplate}">
-                                                        <ItemsControl.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <WrapPanel />
-                                                            </ItemsPanelTemplate>
-                                                        </ItemsControl.ItemsPanel>
-                                                    </ItemsControl>
-
-                                                    <controls:LearnMore 
-                                                        Link="capabilities"
-                                                        Topic="MSIX capabilities"
-                                                        Margin="0 6 0 0" />
-                                                </StackPanel>
-                                            </ScrollViewer>
-                                        </DataTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding  Manifest.CurrentValue.Capabilities.Count}">
-                                        <DataTrigger.Value>
-                                            <system:Int32>0</system:Int32>
-                                        </DataTrigger.Value>
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <StackPanel>
-                                                        <TextBlock>
-                                                            <Run Text="This package does not define any" />
-                                                            <Run FontWeight="SemiBold" Text="capabilities" />
-                                                        </TextBlock>
-
-                                                        <controls:LearnMore 
-                                                            Link="capabilities"
-                                                            Topic="supported MSIX capabilities"
-                                                            Margin="0 6 0 0" />
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ContentControl.Style>
-                    </ContentControl>
+                    <ContentControl 
+                        regions:RegionManager.RegionName="{x:Static common1:PackageExpertDependencies.RegionCapabilities}" 
+                        regions:RegionManager.RegionContext="{Binding Manifest.CurrentValue.Model}" />
                 </TabItem>
             </TabControl>
         </TabItem>
@@ -737,118 +579,11 @@
                 </TabItem>
             </TabControl>
         </TabItem>
-        <TabItem DataContext="{Binding Manifest.CurrentValue}" Header="Dependencies">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Margin="0">
-                    <Border DockPanel.Dock="Top" Visibility="{Binding HasOperatingSystemDependencies, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue={x:Static Visibility.Visible}}">
-                        <StackPanel>
-                            <Border BorderBrush="#ddd" SnapsToDevicePixels="True" UseLayoutRounding="True" BorderThickness="1" CornerRadius="5" HorizontalAlignment="Left">
-                                <TextBlock Text="DEVICE FAMILIES" Margin="10 5" FontWeight="SemiBold" Foreground="#444" />
-                            </Border>
-                            <views:BulletItemControl Height="10" />
-                        </StackPanel>
-                    </Border>
-
-                    <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding OperatingSystemDependencies}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type elements1:OperatingSystemDependencyViewModel}">
-                                <StackPanel>
-                                    <StackPanel.Resources>
-                                        <Style TargetType="Hyperlink">
-                                            <Setter Property="Foreground" Value="Black" />
-                                            <Setter Property="Tag" Value="https://msixhero.net/redirect/windows-10-version-history" />
-                                            <Setter Property="ToolTip" Value="Click to open Windows 10 version history in Wikipedia" />
-                                            <Setter Property="TextDecorations" Value="None" />
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="true">
-                                                    <Setter Property="Foreground" Value="Black" />
-                                                    <Setter Property="TextDecorations" Value="Underline" />
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </StackPanel.Resources>
-                                    <views:BulletItemControl>
-                                        <views:BulletItemControl.Header>
-                                            <Viewbox Width="24" Height="24">
-                                                <Path x:Name="Icon1" Style="{StaticResource Icon}" Data="{StaticResource VectorWindows}" />
-                                            </Viewbox>
-                                        </views:BulletItemControl.Header>
-                                        <TextBlock x:Name="Text1" Style="{StaticResource DataHeader}" Visibility="{Binding HasMinimumVersion, Converter={StaticResource BooleanToVisibilityConverter}}" Text="Minimum required OS" />
-                                        <TextBlock Style="{StaticResource DataValue}" Visibility="{Binding HasMinimumVersion, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                        <Hyperlink Click="HyperlinkOnClick">
-                                                            <Run Text="{Binding Path=MinimumDisplayName , Mode=OneWay}" />
-                                                        </Hyperlink>
-                                                        <Run Text="{Binding Path=MinimumVersion, Mode=OneWay}" Foreground="#b2b2b2" />
-                                        </TextBlock>
-                                    </views:BulletItemControl>
-                                    <views:BulletItemControl x:Name="Bullet2">
-                                        <views:BulletItemControl.Header>
-                                            <Viewbox Width="24" Height="24">
-                                                <Path x:Name="Icon2" Style="{StaticResource Icon}" Data="{StaticResource VectorTestPassed}" />
-                                            </Viewbox>
-                                        </views:BulletItemControl.Header>
-                                        <TextBlock x:Name="Text2" Style="{StaticResource DataHeader}" Visibility="{Binding HasTestedVersion, Converter={StaticResource BooleanToVisibilityConverter}}" Text="Tested on" />
-                                        <TextBlock Style="{StaticResource DataValue}" Visibility="{Binding HasTestedVersion, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                        <Hyperlink Click="HyperlinkOnClick">
-                                                            <Run Text="{Binding Path=TestedDisplayName , Mode=OneWay}" />
-                                                        </Hyperlink>
-                                                        <Run Text="{Binding Path=TestedVersion, Mode=OneWay}" Foreground="#b2b2b2" />
-                                        </TextBlock>
-                                    </views:BulletItemControl>
-                                </StackPanel>
-                                <DataTemplate.Triggers>
-                                    <DataTrigger Binding="{Binding FamilyName}" Value="MSIXCore.Desktop">
-                                        <Setter TargetName="Text1" Property="Text" Value="[MSIX Core] Minimum required OS" />
-                                        <Setter TargetName="Text2" Property="Text" Value="[MSIX Core] Tested on" />
-                                        <Setter TargetName="Icon1" Property="Data" Value="{StaticResource VectorWindowsOld}" />
-                                        <Setter TargetName="Icon2" Property="Data" Value="{StaticResource VectorWindowsOld}" />
-                                        <Setter TargetName="Bullet2" Property="Visibility" Value="Collapsed" />
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <Border Visibility="{Binding HasPackageDependencies, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue={x:Static Visibility.Visible}}">
-                        <StackPanel>
-                            <Border BorderBrush="#ddd" SnapsToDevicePixels="True" UseLayoutRounding="True" BorderThickness="1" CornerRadius="5" HorizontalAlignment="Left">
-                                <TextBlock Text="PACKAGE DEPENDENCIES" Margin="10 5" FontWeight="SemiBold" Foreground="#444" />
-                            </Border>
-                            <views:BulletItemControl Height="10" />
-                        </StackPanel>
-                    </Border>
-
-                    <ItemsControl ItemsSource="{Binding PackageDependencies}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type elements1:PackageDependencyViewModel}">
-                                <views:BulletItemControl>
-                                    <views:BulletItemControl.Header>
-                                        <Viewbox Width="24" Height="24">
-                                            <Path Style="{StaticResource Icon}" Data="{StaticResource VectorCollection}" />
-                                        </Viewbox>
-                                    </views:BulletItemControl.Header>
-                                    <DockPanel>
-                                        <TextBlock Text="{Binding Version}" Margin="8 0" DockPanel.Dock="Right" VerticalAlignment="Center" TextAlignment="Right" />
-
-                                        <StackPanel Margin="0 0" VerticalAlignment="Center">
-                                            <TextBlock Style="{StaticResource DataHeader}" Text="{Binding DisplayPublisherName}" ToolTip="{Binding Publisher}" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Style="{StaticResource DataValue}" Text="{Binding DisplayName}" ToolTip="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                                        </StackPanel>
-                                    </DockPanel>
-                                </views:BulletItemControl>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <TextBlock 
-                        DockPanel.Dock="Top" Margin="0 10">
-                        <Hyperlink Command="{x:Static hero:MsixHeroCommands.DependencyViewer}">
-                            <Run Text="Open dependencies graph..." />
-                        </Hyperlink>
-                    </TextBlock>
-                </StackPanel>
-            </ScrollViewer>
-
+        <TabItem 
+            Header="Dependencies">
+            <ContentControl 
+                regions:RegionManager.RegionName="{x:Static common1:PackageExpertDependencies.RegionDependencies}" 
+                regions:RegionManager.RegionContext="{Binding Manifest.CurrentValue.Model}" />
         </TabItem>
         <TabItem Header="Installation">
             <TabControl Margin="0 -10 0 0" Style="{StaticResource SideMenuTabControl}">

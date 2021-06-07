@@ -16,42 +16,52 @@
 
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
+using Otor.MsixHero.Appx.Packaging.Installation.Enums;
 
 namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
 {
     public class FileReaderFactory
     {
-        public static IAppxFileReader CreateFileReader(string path)
+        public static IAppxFileReader CreateFileReader(string pathOrPackageName)
         {
-            if (string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(pathOrPackageName))
             {
-                throw new ArgumentNullException(nameof(path));
+                throw new ArgumentNullException(nameof(pathOrPackageName));
             }
 
-            if (!File.Exists(path))
+            if (!File.Exists(pathOrPackageName))
             {
-                if (!Directory.Exists(path))
+                if (!Directory.Exists(pathOrPackageName))
                 {
-                    throw new FileNotFoundException("File not found.", path);
+                    throw new FileNotFoundException("File not found.", pathOrPackageName);
                 }
 
-                return new DirectoryInfoFileReaderAdapter(path);
+                return new DirectoryInfoFileReaderAdapter(pathOrPackageName);
             }
 
-            var fileName = Path.GetFileName(path);
+            var reg = Regex.Match(pathOrPackageName, @"^([\w\.\-]+)(?:_~)?_[a-z0-9]{13}$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            if (reg.Success)
+            {
+                // package full name
+                return new PackageIdentityFileReaderAdapter(PackageContext.CurrentUser, pathOrPackageName);
+            }
+
+            // source is a file
+            var fileName = Path.GetFileName(pathOrPackageName);
             if (string.Equals(FileConstants.AppxManifestFile, fileName, StringComparison.OrdinalIgnoreCase))
             {
-                return new FileInfoFileReaderAdapter(path);
+                return new FileInfoFileReaderAdapter(pathOrPackageName);
             }
 
-            var ext = Path.GetExtension(path);
+            var ext = Path.GetExtension(pathOrPackageName);
             switch (ext.ToLowerInvariant())
             {
                 case FileConstants.MsixExtension:
                 case FileConstants.AppxExtension:
-                    return new ZipArchiveFileReaderAdapter(path);
+                    return new ZipArchiveFileReaderAdapter(pathOrPackageName);
                 default:
-                    return new FileInfoFileReaderAdapter(path);
+                    return new FileInfoFileReaderAdapter(pathOrPackageName);
             }
         }
     }

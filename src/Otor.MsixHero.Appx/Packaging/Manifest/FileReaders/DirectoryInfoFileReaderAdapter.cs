@@ -49,6 +49,8 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
             {
                 adapter = new FileInfoFileReaderAdapter(Path.Combine(appxManifestFolder.FullName, FileConstants.AppxManifestFile));
             }
+
+            this.RootFile = appxManifest;
         }
 
         public DirectoryInfoFileReaderAdapter(string appxManifestFolder) : this(new DirectoryInfo(appxManifestFolder))
@@ -56,6 +58,8 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
         }
 
         public string RootDirectory { get; }
+        
+        public string RootFile { get; }
 
         public Stream GetFile(string filePath)
         {

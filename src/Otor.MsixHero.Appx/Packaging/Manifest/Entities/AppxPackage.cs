@@ -26,6 +26,8 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.Entities
     {
         public string RootFolder { get; set; }
 
+        public string PackageFile { get; set; }
+
         public string Name { get; set; }
         
         public string FullName { get; set; }

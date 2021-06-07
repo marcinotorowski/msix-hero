@@ -14,12 +14,22 @@
 // Full notice:
 // https://github.com/marcinotorowski/msix-hero/blob/develop/LICENSE.md
 
-namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
-{
-    public interface IAppxDiskFileReader : IAppxFileReader
-    {
-        string RootDirectory { get; }
+using System.ComponentModel;
+using System.Windows.Controls;
+using Prism.Regions;
 
-        string RootFile { get; }
+namespace Otor.MsixHero.App.Controls.PackageExpert.Regions.Common
+{
+    public abstract class PackageExpertRegionView : UserControl
+    {
+        protected PackageExpertRegionView()
+        {
+            RegionContext.GetObservableContext(this).PropertyChanged += this.OnRegionContextChanged;
+        }
+
+        private async void OnRegionContextChanged(object sender, PropertyChangedEventArgs e)
+        {
+            await ((PackageExpertRegionViewModel)this.DataContext).SetSourceObject(RegionContext.GetObservableContext(this).Value).ConfigureAwait(false);
+        }
     }
 }

@@ -22,6 +22,7 @@ using Notifications.Wpf.Core;
 using Otor.MsixHero.App.Services;
 using Otor.MsixHero.Appx.Packaging;
 using Otor.MsixHero.Infrastructure.Helpers;
+using Prism.Regions;
 
 namespace Otor.MsixHero.App.Controls.PackageExpert.Views
 {
@@ -33,6 +34,7 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.Views
         public Body()
         {
             this.InitializeComponent();
+            
         }
 
         private void HyperlinkOnClick(object sender, RoutedEventArgs e)

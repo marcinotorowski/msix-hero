@@ -78,6 +78,24 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
             }
         }
 
+        public string RootFile
+        {
+            get
+            {
+                if (this.adapter == null)
+                {
+                    this.adapter = GetAdapter();
+                }
+
+                if (this.adapter is IAppxDiskFileReader diskReader)
+                {
+                    return diskReader.RootFile;
+                }
+
+                return null;
+            }
+        }
+
         public Stream GetFile(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))

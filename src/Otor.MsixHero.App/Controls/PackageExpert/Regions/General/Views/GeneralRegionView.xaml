@@ -1,0 +1,84 @@
+﻿<common:PackageExpertRegionView x:Class="Otor.MsixHero.App.Controls.PackageExpert.Regions.General.Views.GeneralRegionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mvvm:ViewModelLocator.AutoWireViewModel="True"
+             xmlns:common="clr-namespace:Otor.MsixHero.App.Controls.PackageExpert.Regions.Common"
+             xmlns:controls="clr-namespace:Otor.MsixHero.App.Controls"
+             xmlns:packageExpert="clr-namespace:Otor.MsixHero.App.Controls.PackageExpert"
+             xmlns:mvvm="http://prismlibrary.com/"
+             xmlns:viewModels="clr-namespace:Otor.MsixHero.App.Controls.PackageExpert.Regions.General.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance viewModels:GeneralPackageRegionViewModel}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+
+            <StackPanel Margin="0 0 0 10">
+                <TextBlock Style="{StaticResource DataHeader}" Text="Signed by" Visibility="Collapsed" />
+                <controls:ProgressOverlay 
+                        IsShown="{Binding IsTrusting}">
+                    <packageExpert:SignatureStatusControl 
+                        Trustee="{Binding TrustStatus.CurrentValue.Trustee}"
+                        TrustMeCommand="{Binding TrustMeCommand}"
+                        ViewPropertiesCommand="{Binding ShowPropertiesCommand}"
+                        IsTrusted="{Binding TrustStatus.CurrentValue.IsTrusted}"
+                        IsChainLoaded="{Binding TrustStatus.IsLoading, Converter={StaticResource NegativeConverter}}"/>
+                </controls:ProgressOverlay>
+            </StackPanel>
+
+            <StackPanel>
+                <StackPanel Margin="0 0 0 0" VerticalAlignment="Top">
+                    <TextBlock Style="{StaticResource DataHeader}" Text="Publisher" />
+                    <TextBox Style="{StaticResource DataValueTextBlock}" Text="{Binding Publisher, Mode=OneWay}" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0 10 0 0">
+                    <TextBlock Style="{StaticResource DataHeader}" Text="Description" />
+                    <TextBox Style="{StaticResource DataValueTextBlock}" Text="{Binding Description, Mode=OneWay, TargetNullValue='None', FallbackValue='None'}" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0 10 0 0">
+                    <TextBlock Style="{StaticResource DataHeader}" Text="Family name" />
+                    <TextBox Style="{StaticResource DataValueTextBlock}" Text="{Binding Path=FamilyName, Mode=OneWay}" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0 10 0 0">
+                    <TextBlock Style="{StaticResource DataHeader}" Text="Full package name" />
+                    <TextBox Style="{StaticResource DataValueTextBlock}" Text="{Binding Path=PackageFullName, Mode=OneWay}" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0 10 0 0">
+                    <TextBlock Style="{StaticResource DataHeader}" Text="Architecture" />
+                    <TextBox Style="{StaticResource DataValueTextBlock}" Text="{Binding Path=Architecture, Mode=OneWay}" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0 10 0 0">
+                    <TextBlock Style="{StaticResource DataHeader}">
+                         <Run Text="Package Integrity Enforcement" />
+                    </TextBlock>
+                    <TextBlock Visibility="{Binding PackageIntegrity, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource DataValue}" TextWrapping="Wrap">
+                         <Run Text="Enforce run time package integrity checks on the entire contents of the package" />
+                         <Hyperlink Click="HyperlinkOnClick" Tag="https://msixhero.net/redirect/package-integrity-enforcement">[more info]</Hyperlink>
+                    </TextBlock>
+                    <TextBlock Visibility="{Binding PackageIntegrity, Converter={StaticResource NegativeBooleanToVisibilityConverter}}" Style="{StaticResource DataValue}" TextWrapping="Wrap">
+                         <Run Text="Default settings" />
+                         <Hyperlink Click="HyperlinkOnClick" Tag="https://msixhero.net/redirect/package-integrity-enforcement">[more info]</Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel  
+                Margin="0 10 0 0" 
+                Visibility="{Binding HasBuildInfo, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Style="{StaticResource DataHeader}" Text="Packaging environment" />
+                <TextBlock Style="{StaticResource DataValue}" Margin="0">
+                    <Run Text="{Binding BuiltWith, Mode=OneWay, TargetNullValue='Unknown product'}" />
+                    <Run Text="{Binding BuiltWithVersion, Mode=OneWay}" />
+                </TextBlock>
+                <TextBlock 
+                    Style="{StaticResource DataValue}" 
+                    Text="{Binding BuiltWithOperatingSystem, TargetNullValue='Unknown Operating System'}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</common:PackageExpertRegionView>

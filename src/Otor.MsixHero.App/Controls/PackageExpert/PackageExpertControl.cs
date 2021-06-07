@@ -181,8 +181,6 @@ namespace Otor.MsixHero.App.Controls.PackageExpert
                 sender.ipcManager,
                 sender.packageManagerProvider,
                 sender.volumeManagerProvider,
-                sender.signingManagerProvider,
-                sender.interactionService,
                 sender.fileViewer,
                 sender.fileInvoker);
 

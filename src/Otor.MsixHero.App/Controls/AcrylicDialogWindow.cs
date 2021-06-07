@@ -14,8 +14,6 @@
 // Full notice:
 // https://github.com/marcinotorowski/msix-hero/blob/develop/LICENSE.md
 
-using System.Windows;
-using System.Windows.Media;
 using Prism.Services.Dialogs;
 using SourceChord.FluentWPF;
 

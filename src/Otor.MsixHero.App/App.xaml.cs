@@ -20,6 +20,9 @@ using Notifications.Wpf.Core;
 using Notifications.Wpf.Core.Controls;
 using Otor.MsixHero.App.Controls;
 using Otor.MsixHero.App.Controls.PackageExpert;
+using Otor.MsixHero.App.Controls.PackageExpert.Regions;
+using Otor.MsixHero.App.Controls.PackageExpert.Regions.Capabilities.Views;
+using Otor.MsixHero.App.Controls.PackageExpert.Regions.Common;
 using Otor.MsixHero.App.Dialogs.ViewModels;
 using Otor.MsixHero.App.Dialogs.Views;
 using Otor.MsixHero.App.Helpers;
@@ -112,10 +115,13 @@ namespace Otor.MsixHero.App
             containerRegistry.Register<IThirdPartyAppProvider, ThirdPartyAppProvider>();
             containerRegistry.Register<IServiceRecommendationAdvisor, ServiceRecommendationAdvisor>();
             containerRegistry.RegisterSingleton<PrismServices>();
-            
+
+            PackageExpertDependencies.RegisterTypes(containerRegistry);
+
             containerRegistry.RegisterDialog<PackageExpertDialogView, PackageExpertDialogViewModel>(NavigationPaths.DialogPaths.PackageExpert);
 
-            if (Environment.GetCommandLineArgs().Length < 2)
+            containerRegistry.RegisterDialogWindow<AcrylicDialogWindow>();
+            if (false && Environment.GetCommandLineArgs().Length < 2)
             {
                 containerRegistry.RegisterDialogWindow<AcrylicDialogWindow>();
             }
@@ -152,9 +158,15 @@ namespace Otor.MsixHero.App
             base.ConfigureModuleCatalog(moduleCatalog);
         }
 
-        private void InitializeMainWindow()
+        private void InitializeCommon(IRegionManager regionManager)
         {
-            var regionManager = this.Container.Resolve<IRegionManager>();
+            PackageExpertDependencies.RegisterRegions(regionManager);
+        }
+
+        private void InitializeMainWindow(IRegionManager regionManager)
+        {
+            this.InitializeCommon(regionManager);
+
             regionManager.RegisterViewWithRegion(RegionNames.Root, typeof(ShellView));
 
             ViewModelLocationProvider.Register<PackageExpertDialogView, PackageExpertDialogViewModel>();
@@ -175,10 +187,11 @@ namespace Otor.MsixHero.App
             }
         }
         
-        private void InitializePackageExpert()
+        private void InitializePackageExpert(IRegionManager regionManager)
         {
+            this.InitializeCommon(regionManager);
+
             ViewModelLocationProvider.Register<PackageExpertDialogView, PackageExpertDialogViewModel>();
-            var regionManager = this.Container.Resolve<IRegionManager>();
             regionManager.RegisterViewWithRegion(RegionNames.PackageExpert, typeof(PackageExpertControl));
             var par = new DialogParameters
             {
@@ -210,14 +223,15 @@ namespace Otor.MsixHero.App
                     TierController.SetSystemTier();
                     break;
             }
-            
+
+            var regionManager = this.Container.Resolve<IRegionManager>();
             if (Environment.GetCommandLineArgs().Length > 1)
             {
-                this.InitializePackageExpert();
+                this.InitializePackageExpert(regionManager);
             }
             else
             {
-                this.InitializeMainWindow();
+                this.InitializeMainWindow(regionManager);
             }
         }
         

@@ -1,31 +1,23 @@
-﻿// MSIX Hero
-// Copyright (C) 2021 Marcin Otorowski
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
-// Full notice:
-// https://github.com/marcinotorowski/msix-hero/blob/develop/LICENSE.md
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Otor.MsixHero.App.Controls.PackageExpert.Regions.Common;
 using Otor.MsixHero.Appx.Packaging.Manifest.Entities;
 
-namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
+namespace Otor.MsixHero.App.Controls.PackageExpert.Regions.Capabilities.ViewModels
 {
-    public class CapabilitiesViewModel
+    public class CapabilitiesRegionViewModel : PackageExpertPackageRegionViewModel
     {
-        public CapabilitiesViewModel(IEnumerable<AppxCapability> capabilities)
+        protected override Task OnSourceChanged(AppxPackage sourcePackage)
+        {
+            this.SetCapabilities(sourcePackage.Capabilities);
+            return Task.CompletedTask;
+        }
+        
+        private void SetCapabilities(IEnumerable<AppxCapability> appxPackageCapabilities)
         {
             this.Count = 0;
-            foreach (var c in capabilities.GroupBy(c => c.Type))
+            foreach (var c in appxPackageCapabilities.GroupBy(c => c.Type))
             {
                 switch (c.Key)
                 {
@@ -47,17 +39,20 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
                         break;
                 }
             }
+
+            this.OnPropertyChanged(null);
         }
 
-        public int Count { get; }
 
-        public IReadOnlyCollection<CapabilityViewModel> General { get; }
+        public int Count { get; private set; }
 
-        public IReadOnlyCollection<CapabilityViewModel> Restricted { get; }
+        public IReadOnlyCollection<CapabilityViewModel> General { get; private set; }
 
-        public IReadOnlyCollection<CapabilityViewModel> Device { get; }
+        public IReadOnlyCollection<CapabilityViewModel> Restricted { get; private set; }
 
-        public IReadOnlyCollection<CapabilityViewModel> Custom { get; }
+        public IReadOnlyCollection<CapabilityViewModel> Device { get; private set; }
+
+        public IReadOnlyCollection<CapabilityViewModel> Custom { get; private set; }
 
         public bool HasGeneral => this.General?.Any() == true;
 

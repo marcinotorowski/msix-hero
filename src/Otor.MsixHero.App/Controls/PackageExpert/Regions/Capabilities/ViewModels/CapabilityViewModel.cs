@@ -20,7 +20,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Media;
 using Otor.MsixHero.Appx.Packaging.Manifest.Entities;
 
-namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
+namespace Otor.MsixHero.App.Controls.PackageExpert.Regions.Capabilities.ViewModels
 {
     public class CapabilityViewModel
     {
