@@ -13,6 +13,7 @@
     xmlns:converters="clr-namespace:Otor.MsixHero.App.Converters"
     xmlns:commands="clr-namespace:Otor.MsixHero.App.Hero"
     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:items1="clr-namespace:Otor.MsixHero.App.Controls.PackageExpert.Regions.Applications.ViewModels"
     mc:Ignorable="d" 
     MinWidth="250"
     d:DataContext="{d:DesignInstance viewModels:PackageExpertViewModel}"
@@ -30,7 +31,7 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type items:AppxApplicationViewModel}">
+                <DataTemplate DataType="{x:Type items1:AppxApplicationViewModel}">
                     <Button
                         CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource AncestorType=Popup}}"
                         Command="{x:Static commands:MsixHeroCommands.StartPackage}"

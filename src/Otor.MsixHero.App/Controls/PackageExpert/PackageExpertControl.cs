@@ -24,11 +24,8 @@ using Otor.MsixHero.App.Controls.PackageExpert.ViewModels;
 using Otor.MsixHero.App.Controls.PackageExpert.Views;
 using Otor.MsixHero.App.Hero.Events;
 using Otor.MsixHero.Appx.Packaging.Installation;
-using Otor.MsixHero.Appx.Packaging.Manifest.FileReaders;
-using Otor.MsixHero.Appx.Signing;
 using Otor.MsixHero.Appx.Volumes;
 using Otor.MsixHero.Infrastructure.Configuration;
-using Otor.MsixHero.Infrastructure.Helpers;
 using Otor.MsixHero.Infrastructure.Logging;
 using Otor.MsixHero.Infrastructure.Processes;
 using Otor.MsixHero.Infrastructure.Processes.SelfElevation;
@@ -64,11 +61,7 @@ namespace Otor.MsixHero.App.Controls.PackageExpert
         private readonly IInterProcessCommunicationManager ipcManager;
         private readonly ISelfElevationProxyProvider<IAppxPackageManager> packageManagerProvider;
         private readonly ISelfElevationProxyProvider<IAppxVolumeManager> volumeManagerProvider;
-        private readonly IInteractionService interactionService;
-        private readonly ISelfElevationProxyProvider<ISigningManager> signingManagerProvider;
         private readonly IConfigurationService configurationService;
-        private readonly IAppxFileViewer fileViewer;
-        private readonly FileInvoker fileInvoker;
         private readonly ObservableObject<object> context;
         private ActionBar actionBar;
 
@@ -76,11 +69,7 @@ namespace Otor.MsixHero.App.Controls.PackageExpert
             IInterProcessCommunicationManager ipcManager,
             ISelfElevationProxyProvider<IAppxPackageManager> packageManagerProvider,
             ISelfElevationProxyProvider<IAppxVolumeManager> volumeManagerProvider,
-            ISelfElevationProxyProvider<ISigningManager> signingManagerProvider,
-            IInteractionService interactionService,
-            IConfigurationService configurationService,
-            IAppxFileViewer fileViewer,
-            FileInvoker fileInvoker
+            IConfigurationService configurationService
         )
         {
             this.context = RegionContext.GetObservableContext(this);
@@ -88,11 +77,7 @@ namespace Otor.MsixHero.App.Controls.PackageExpert
             this.ipcManager = ipcManager;
             this.packageManagerProvider = packageManagerProvider;
             this.volumeManagerProvider = volumeManagerProvider;
-            this.interactionService = interactionService;
-            this.signingManagerProvider = signingManagerProvider;
             this.configurationService = configurationService;
-            this.fileViewer = fileViewer;
-            this.fileInvoker = fileInvoker;
 
             eventAggregator.GetEvent<ToolsChangedEvent>().Subscribe(this.CreateTools, ThreadOption.UIThread);
         }
@@ -180,9 +165,7 @@ namespace Otor.MsixHero.App.Controls.PackageExpert
                 newFilePath,
                 sender.ipcManager,
                 sender.packageManagerProvider,
-                sender.volumeManagerProvider,
-                sender.fileViewer,
-                sender.fileInvoker);
+                sender.volumeManagerProvider);
 
             try
             {

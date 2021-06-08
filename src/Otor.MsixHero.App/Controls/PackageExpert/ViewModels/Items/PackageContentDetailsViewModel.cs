@@ -14,19 +14,14 @@
 // Full notice:
 // https://github.com/marcinotorowski/msix-hero/blob/develop/LICENSE.md
 
-using System.Collections.ObjectModel;
-using System.Linq;
 using Otor.MsixHero.App.Mvvm;
 using Otor.MsixHero.Appx.Packaging.Manifest.Entities;
-using Otor.MsixHero.Appx.Packaging.Manifest.Entities.Build;
 using Otor.MsixHero.Appx.Packaging.Manifest.Entities.Sources;
 
 namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
 {
     public class PackageContentDetailsViewModel : NotifyPropertyChanged
     {
-        private AppxApplicationViewModel _selectedFixup;
-
         public PackageContentDetailsViewModel(AppxPackage model, string filePath = null)
         {
             this.Model = model;
@@ -40,8 +35,6 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
             this.Version = model.Version;
             this.Logo = model.Logo;
             
-            this.Applications = new ObservableCollection<AppxApplicationViewModel>();
-            
             this.ScriptsCount = 0;
 
             if (model.Applications != null)
@@ -52,23 +45,12 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
                     {
                         this.TileColor = item.BackgroundColor;
                     }
-
-                    this.Applications.Add(new AppxApplicationViewModel(item, model));
+                    
                     this.ScriptsCount += item.Psf?.Scripts?.Count ?? 0;
+                    this.ApplicationCount++;
                 }
             }
             
-            this.Fixups = new ObservableCollection<AppxApplicationViewModel>(this.Applications.Where(a => a.HasPsf && a.Psf != null && (a.Psf.HasFileRedirections || a.Psf.HasTracing || a.Psf.HasOtherFixups)));
-            this._selectedFixup = this.Fixups.FirstOrDefault();
-            
-            // 1) fixup count is the sum of all individual file redirections...
-            this.FixupsCount = this.Fixups.SelectMany(s => s.Psf.FileRedirections).Select(s => s.Exclusions.Count + s.Inclusions.Count).Sum();
-            
-            // 2) plus additionally number of apps that have tracing
-            this.FixupsCount += this.Applications.Count(a => a.HasPsf && a.Psf.HasTracing);
-            
-            this.BuildInfo = model.BuildInfo;
-
             if (string.IsNullOrEmpty(this.TileColor))
             {
                 this.TileColor = "#666666";
@@ -106,22 +88,8 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items
 
         public string Version { get; }
         
-        public ObservableCollection<AppxApplicationViewModel> Applications { get; }
-
-        public ObservableCollection<AppxApplicationViewModel> Fixups { get; }
-
-        public AppxApplicationViewModel SelectedFixup
-        {
-            get => this._selectedFixup;
-            set => this.SetField(ref this._selectedFixup, value);
-        }
-
-        public BuildInfo BuildInfo { get; }
-
-        public int FixupsCount { get; }
-        
         public int ScriptsCount { get; }
 
-        public bool HasBuildInfo => this.BuildInfo != null;
+        public int ApplicationCount { get; }
     }
 }

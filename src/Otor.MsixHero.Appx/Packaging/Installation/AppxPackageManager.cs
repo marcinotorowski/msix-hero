@@ -612,6 +612,8 @@ namespace Otor.MsixHero.Appx.Packaging.Installation
             var manifestReader = new AppxManifestReader();
             // ReSharper disable once AccessToDisposedClosure
             var package = await Task.Run(() => manifestReader.Read(reader, true, cancellationToken), cancellationToken).ConfigureAwait(false);
+
+            package.PackageFile = Path.Combine(package.RootFolder, FileConstants.AppxManifestFile);
             return package;
         }
 
@@ -621,6 +623,8 @@ namespace Otor.MsixHero.Appx.Packaging.Installation
             var manifestReader = new AppxManifestReader();
             // ReSharper disable once AccessToDisposedClosure
             var package = await Task.Run(() => manifestReader.Read(reader, true, cancellationToken), cancellationToken).ConfigureAwait(false);
+            package.PackageFile = manifestPath;
+            package.RootFolder = Path.GetDirectoryName(manifestPath);
             return package;
         }
 

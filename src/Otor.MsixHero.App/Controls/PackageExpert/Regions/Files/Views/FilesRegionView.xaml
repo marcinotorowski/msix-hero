@@ -1,0 +1,112 @@
+﻿<common:PackageExpertRegionView 
+     regions:ViewModelLocator.AutoWireViewModel="True"
+     x:Class="Otor.MsixHero.App.Controls.PackageExpert.Regions.Files.Views.FilesRegionView"
+     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+     xmlns:regions="http://prismlibrary.com/"
+     xmlns:common="clr-namespace:Otor.MsixHero.App.Controls.PackageExpert.Regions.Common"
+     xmlns:viewModels="clr-namespace:Otor.MsixHero.App.Controls.PackageExpert.Regions.Files.ViewModels"
+     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+     xmlns:behaviors="clr-namespace:Otor.MsixHero.App.Helpers.Behaviors"
+     xmlns:interop="clr-namespace:Otor.MsixHero.App.Helpers.Interop"
+     xmlns:commands="clr-namespace:Otor.MsixHero.App.Mvvm.Commands"
+     xmlns:hero="clr-namespace:Otor.MsixHero.App.Hero"
+     xmlns:system="clr-namespace:System;assembly=System.Runtime"
+     mc:Ignorable="d" 
+     d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance viewModels:FilesRegionViewModel}">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="4*" />
+        </Grid.ColumnDefinitions>
+        <TreeView 
+            ItemsSource="{Binding FileTree.Containers.CurrentValue}">
+            <b:Interaction.Behaviors>
+                <behaviors:MvvmSelectedItemBehavior SelectedItem="{Binding FileTree.SelectedContainer}" />
+            </b:Interaction.Behaviors>
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Containers}">
+                    <DockPanel>
+                        <Image Margin="2 -2"  VerticalAlignment="Center" Source="{x:Static interop:WindowsIcons.FolderSmall}" Width="16" Height="16" SnapsToDevicePixels="True" UseLayoutRounding="True" />
+                        <TextBlock TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4 2" Text="{Binding}" />
+                    </DockPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
+        </TreeView>
+
+        <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" Width="20" VerticalAlignment="Stretch" />
+
+        <ListView 
+                            SelectionMode="Single"
+                            SelectedItem="{Binding FileTree.SelectedNode}"
+                            Grid.Column="2" x:Name="Files" 
+                            Tag="{Binding FileTree.Nodes.Count, FallbackValue=0, TargetNullValue=0}"
+                            ItemsSource="{Binding FileTree.Nodes}">
+            <commands:RoutedCommandHandlers.Commands>
+                <commands:RoutedCommandHandler 
+                                    RoutedCommand="{x:Static hero:MsixHeroCommands.OpenFile}" 
+                                    Command="{Binding FileTree.View}" />
+            </commands:RoutedCommandHandlers.Commands>
+            <ListView.Style>
+                <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="ListView">
+                    <Style.Triggers>
+                        <Trigger Property="Tag">
+                            <Trigger.Value>
+                                <system:Int32>0</system:Int32>
+                            </Trigger.Value>
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.Style>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="View/edit" Command="{x:Static hero:MsixHeroCommands.OpenFile}">
+                        <MenuItem.Icon>
+                            <Path Style="{StaticResource MediumIcon}" Data="{StaticResource VectorOpen}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.View>
+                <GridView>
+                    <GridView.Columns>
+                        <GridViewColumn 
+                            Header="Name"
+                            Width="200">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <DockPanel>
+                                        <Image Margin="2 -2"  VerticalAlignment="Center" Source="{x:Static interop:WindowsIcons.DocumentSmall}" Width="16" Height="16" SnapsToDevicePixels="True" UseLayoutRounding="True" />
+                                        <TextBlock TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4 2" Text="{Binding Name}" />
+                                    </DockPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn 
+                            Header="Size"
+                            Width="100">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <DockPanel>
+                                        <TextBlock TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4 2" Text="{Binding Size}" />
+                                    </DockPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView.Columns>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</common:PackageExpertRegionView>

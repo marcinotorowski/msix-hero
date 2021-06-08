@@ -48,7 +48,10 @@ namespace Otor.MsixHero.Appx.Packaging.Installation
 
             using (reader)
             {
-                return await manifestReader.Read(reader, cancellationToken).ConfigureAwait(false);
+                var appx = await manifestReader.Read(reader, cancellationToken).ConfigureAwait(false);
+                appx.PackageFile = pkg.ManifestLocation;
+                appx.RootFolder = pkg.InstallLocation;
+                return appx;
             }
         }
     }

@@ -30,13 +30,16 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
 
         public FileInfoFileReaderAdapter(FileInfo appxManifestFile)
         {
+            if (appxManifestFile == null)
+            {
+                throw new ArgumentNullException(nameof(appxManifestFile));
+            }
+
             if (!appxManifestFile.Exists)
             {
                 throw new ArgumentException($"File {appxManifestFile.FullName} does not exist.", nameof(appxManifestFile));
             }
-
-            this.RootDirectory = appxManifestFile.DirectoryName;
-            this.RootFile = appxManifestFile.FullName;
+            
             this.appxManifestFile = appxManifestFile;
         }
 
@@ -44,20 +47,21 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
         {
             if (string.IsNullOrEmpty(appxManifestFile))
             {
-                this.RootDirectory = null;
-                this.appxManifestFile = null;
+                throw new ArgumentException("Path to APPX manifest may not be empty.", nameof(appxManifestFile));
             }
-            else
+
+            if (!File.Exists(appxManifestFile))
             {
-                var fileInfo = new FileInfo(appxManifestFile);
-                this.RootDirectory = fileInfo.DirectoryName;
-                this.appxManifestFile = fileInfo;
+                throw new ArgumentException($"File {appxManifestFile} does not exist.", nameof(appxManifestFile));
             }
+
+            this.appxManifestFile = new FileInfo(appxManifestFile);
         }
 
-        public string RootDirectory { get; }
+        public string RootDirectory => this.appxManifestFile.Directory?.FullName;
 
-        public string RootFile { get; }
+        public string RootFile => this.appxManifestFile.FullName;
+
 
         public Stream GetFile(string filePath)
         {
@@ -122,7 +126,7 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
             var resourceDir = Path.GetDirectoryName(resourceFilePath);
 
             var dirsToTry = new Queue<string>();
-            dirsToTry.Enqueue(string.IsNullOrEmpty(resourceDir) ? this.appxManifestFile.DirectoryName : Path.Combine(this.appxManifestFile.DirectoryName, resourceDir));
+            dirsToTry.Enqueue(string.IsNullOrEmpty(resourceDir) ? this.appxManifestFile.DirectoryName : Path.Combine(this.RootDirectory, resourceDir));
 
             while (dirsToTry.Any())
             {
@@ -139,11 +143,11 @@ namespace Otor.MsixHero.Appx.Packaging.Manifest.FileReaders
                     var name = Regex.Replace(matchingFile.Name, @"\.[^\.\-]+-[^\.\-]+", string.Empty);
                     if (string.Equals(name, fileName, StringComparison.OrdinalIgnoreCase))
                     {
-                        return this.GetFile(Path.GetRelativePath(this.appxManifestFile.DirectoryName, matchingFile.FullName));
+                        return this.GetFile(Path.GetRelativePath(this.RootDirectory, matchingFile.FullName));
                     }
                 }
 
-                var matchingDirectories = dirInfo.EnumerateDirectories().Where(d => Regex.IsMatch(dirInfo.Name, @".[^\.\-]+-[^\.\-]+"));
+                var matchingDirectories = dirInfo.EnumerateDirectories().Where(d => Regex.IsMatch(d.Name, @".[^\.\-]+-[^\.\-]+"));
                 foreach (var matchingDirectory in matchingDirectories)
                 {
                     dirsToTry.Enqueue(matchingDirectory.FullName);

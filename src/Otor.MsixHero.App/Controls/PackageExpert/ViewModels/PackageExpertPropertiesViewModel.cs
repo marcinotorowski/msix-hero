@@ -19,7 +19,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Otor.MsixHero.App.Controls.PackageExpert.Regions.Dependencies.ViewModels;
-using Otor.MsixHero.App.Controls.PackageExpert.ViewModels.Items;
 using Otor.MsixHero.App.Mvvm;
 using Otor.MsixHero.Appx.Packaging;
 using Otor.MsixHero.Appx.Packaging.Installation.Enums;
@@ -44,7 +43,6 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
             this.Logo = model.Logo;
 
             this.OperatingSystemDependencies = new ObservableCollection<OperatingSystemDependencyViewModel>();
-            this.Applications = new ObservableCollection<AppxApplicationViewModel>();
             this.PackageDependencies = new ObservableCollection<PackageDependencyViewModel>();
 
             if (model.OperatingSystemDependencies != null)
@@ -77,18 +75,10 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
                         this.TileColor = item.BackgroundColor;
                     }
 
-                    this.Applications.Add(new AppxApplicationViewModel(item, model));
+                    this.ApplicationsCount++;
                     this.ScriptsCount += item.Psf?.Scripts?.Count ?? 0;
                 }
             }
-
-            this.Fixups = new ObservableCollection<AppxApplicationViewModel>(this.Applications.Where(a => a.HasPsf && a.Psf != null && (a.Psf.HasFileRedirections || a.Psf.HasTracing || a.Psf.HasOtherFixups)));
-            
-            // 1) fix-up count is the sum of all individual file redirections...
-            this.FixupsCount = this.Fixups.SelectMany(s => s.Psf.FileRedirections).Select(s => s.Exclusions.Count + s.Inclusions.Count).Sum();
-
-            // 2) plus additionally number of apps that have tracing
-            this.FixupsCount += this.Applications.Count(a => a.HasPsf && a.Psf.HasTracing);
             
             if (string.IsNullOrEmpty(this.TileColor))
             {
@@ -280,12 +270,8 @@ namespace Otor.MsixHero.App.Controls.PackageExpert.ViewModels
 
         public ObservableCollection<PackageDependencyViewModel> PackageDependencies { get; }
 
-        public ObservableCollection<AppxApplicationViewModel> Applications { get; }
-
-        public ObservableCollection<AppxApplicationViewModel> Fixups { get; }
+        public int ApplicationsCount { get; }
         
-        public int FixupsCount { get; }
-
         public int ScriptsCount { get; }
     }
 }

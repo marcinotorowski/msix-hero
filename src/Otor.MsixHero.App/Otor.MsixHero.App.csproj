@@ -105,10 +105,22 @@
     <Compile Update="Controls\CertificateSelector\View\CertificateSelectorView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Controls\PackageExpert\Regions\Applications\Views\ApplicationsRegionView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Controls\PackageExpert\Regions\Dependencies\Views\DependenciesRegionView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Controls\PsfContent\View\PsfContentView.xaml.cs">
+    <Compile Update="Controls\PackageExpert\Regions\Installation\Views\InstallationRegionView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Controls\PackageExpert\Regions\Psf\Views\PsfRegionView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Controls\PackageExpert\Regions\Registry\Views\RegistryRegionView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Controls\PackageExpert\Regions\Files\Views\FilesRegionView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Dialogs\Views\PackageExpertDialogView - Copy.xaml.cs">
@@ -190,7 +202,27 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Controls\PackageExpert\Regions\Applications\Views\ApplicationsRegionView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Controls\PackageExpert\Regions\Dependencies\Views\DependenciesRegionView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Controls\PackageExpert\Regions\Installation\Views\InstallationRegionView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Controls\PackageExpert\Regions\Psf\Views\PsfRegionView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Controls\PackageExpert\Regions\Registry\Views\RegistryRegionView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Controls\PackageExpert\Regions\Files\Views\FilesRegionView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
@@ -202,9 +234,6 @@
     </Page>
     <Page Update="Controls\PackageSelector\View\PackageSelectorView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Controls\PsfContent\View\PsfContentView.xaml">
-      <SubType>Designer</SubType>
     </Page>
     <Page Update="Controls\TransitionContentControl\Theme.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
